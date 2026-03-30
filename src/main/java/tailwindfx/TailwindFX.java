@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * TailwindFX — punto de entrada principal.
+ * TailwindFX — Main entry point.
  *
- * Uso básico:
+ * Basic usage:
  *   TailwindFX.install(scene);
  *   TailwindFX.apply(node, "btn-primary", "rounded-lg");
  *   TailwindFX.jit(node, "bg-blue-500/80", "p-[13px]", "-translate-x-4");
@@ -43,11 +43,11 @@ public final class TailwindFX {
     private TailwindFX() {}
 
     // =========================================================================
-    // Instalación
+    // Installation
     // =========================================================================
 
     /**
-     * Instala el archivo CSS combinado (todos los módulos).
+     * Installs the combined CSS file (all modules).
      */
     public static void install(Scene scene) {
         String url = Objects.requireNonNull(
@@ -60,58 +60,58 @@ public final class TailwindFX {
     }
 
     /**
-     * Instala solo el módulo base (variables y reset).
-     * Requerido por los demás módulos.
+     * Installs only the base module (variables and reset).
+     * Required by other modules.
      */
     public static void installBase(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-base.css");
     }
 
     /**
-     * Instala el módulo de componentes JavaFX.
+     * Installs the JavaFX components module.
      */
     public static void installComponents(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-components.css");
     }
 
     /**
-     * Instala el módulo de utilidades (layout, spacing, sizing).
+     * Installs the utilities module (layout, spacing, sizing).
      */
     public static void installUtilities(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-utilities.css");
     }
 
     /**
-     * Instala el módulo de colores y tipografía.
+     * Installs the colors and typography module.
      */
     public static void installColors(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-colors.css");
     }
 
     /**
-     * Instala el módulo de efectos (sombras, transforms, filtros).
+     * Installs the effects module (shadows, transforms, filters).
      */
     public static void installEffects(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-effects.css");
     }
 
     /**
-     * Instala el módulo de componentes preset (cards, badges, buttons, etc.).
+     * Installs the components preset module (cards, badges, buttons, etc.).
      */
     public static void installComponentsPreset(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-components-preset.css");
     }
 
     /**
-     * Instala el módulo de modo oscuro.
+     * Installs the dark mode module.
      */
     public static void installDark(Scene scene){
         installCss(scene, "/tailwindfx/tailwindfx-dark.css");
     }
 
     /**
-     * Instala los módulos esenciales (base + components + components-preset).
-     * Esta es la configuración recomendada para la mayoría de aplicaciones.
+     * Installs essential modules (base + components + components-preset).
+     * This is the recommended setup for most applications.
      */
     public static void installEssentials(Scene scene){
         installBase(scene);
@@ -120,8 +120,8 @@ public final class TailwindFX {
     }
 
     /**
-     * Instala todos los módulos individuales.
-     * Equivalente a install() pero cargando cada archivo por separado.
+     * Installs all individual modules.
+     * Equivalent to install() but loading each file separately.
      */
     public static void installAll(Scene scene){
         installBase(scene);
@@ -136,7 +136,7 @@ public final class TailwindFX {
     private static void installCss(Scene scene, String css_path){
         String url = Objects.requireNonNull(
             TailwindFX.class.getResource(css_path),
-            "tailwindfx.css not found in classpath"
+            css_path +" not found in classpath"
         ).toExternalForm();
         if (!scene.getStylesheets().contains(url)) {
             scene.getStylesheets().add(url);
@@ -149,7 +149,7 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // CSS classes — del stylesheet
+    // CSS Classes — from stylesheet
     // =========================================================================
 
     /**
@@ -230,16 +230,16 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // JIT — tokens con /alpha, negativos y arbitrarios [valor]
+    // JIT — Tokens with /alpha, negatives, and arbitrary [value]
     // =========================================================================
 
     /**
-     * Aplica tokens JIT como inline style (no destructivo con estilos previos).
+     * Applies JIT tokens as inline style (non-destructive with previous styles).
      *
-     * Soporta sintaxis que las CSS classes no pueden:
-     *   TailwindFX.jit(node, "bg-blue-500/80")     // color con opacidad
-     *   TailwindFX.jit(node, "-translate-x-4")     // negativo
-     *   TailwindFX.jit(node, "w-[320px]")          // valor arbitrario
+     * Supports syntax that CSS classes cannot:
+     *   TailwindFX.jit(node, "bg-blue-500/80")     // color with opacity
+     *   TailwindFX.jit(node, "-translate-x-4")     // negative
+     *   TailwindFX.jit(node, "w-[320px]")          // arbitrary value
      *   TailwindFX.jit(node, "p-[13px]", "bg-[#ff6600]", "opacity-[0.65]")
      *   TailwindFX.jit(node, "rotate-[45deg]")
      */
@@ -283,11 +283,11 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // Theme Scopes — tema por subtree
+    // Theme Scopes — Theme by subtree
     // =========================================================================
 
     /**
-     * Aplica un tema a un subtree (Pane y sus hijos), sin afectar el resto de la Scene.
+     * Applies a theme to a subtree (Pane and its children), without affecting the rest of the Scene.
      *
      *   TailwindFX.scope(alertPanel).preset("rose").apply();
      *   TailwindFX.scope(adminPane).dark().apply();
@@ -339,8 +339,8 @@ public final class TailwindFX {
     // =========================================================================
 
     /**
-     * Animaciones de entrada/salida/atención para nodos.
-     * Delega a AnimationUtil — también se puede usar directamente.
+     * Enter/exit/attention animations for nodes.
+     * Delegates to AnimationUtil — can also be used directly.
      *
      *   TailwindFX.fadeIn(node).play();
      *   TailwindFX.fadeIn(node, 300).play();
@@ -437,7 +437,7 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // Layout Engine
+    // Layout Builder
     // =========================================================================
 
     public static FxLayout layout(Pane container) {
@@ -461,12 +461,12 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // Styles — API Java para lo que CSS no puede hacer en JavaFX
-    // Delega a Styles.java, también usable directamente.
+    // Styles — Java API for what CSS cannot do in JavaFX
+    // Delegates to Styles.java, also usable directly.
     // =========================================================================
 
     /**
-     * GridPane: col-span, row-span, posición de celda.
+     * GridPane: col-span, row-span, cell position.
      *   TailwindFX.colSpan(card, 3)
      *   TailwindFX.rowSpanFull(panel)
      *   TailwindFX.gridCell(node, col, row)
