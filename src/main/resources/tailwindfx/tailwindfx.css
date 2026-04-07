@@ -11206,7 +11206,9 @@ MenuBar .menu:showing .label {
 
 .img-fluid {
     -fx-pref-width: 100%;
-    /* -fx-fit-width, -fx-fit-height,  -fx-fit-height: 32px; }
+    /* -fx-fit-width, -fx-fit-height not supported in JavaFX CSS — use Java API */
+}
+.img-fixed-sm  { -fx-fit-width: 32px;  -fx-fit-height: 32px; }
 .img-fixed-md  { -fx-fit-width: 64px;  -fx-fit-height: 64px; }
 .img-fixed-lg  { -fx-fit-width: 128px; -fx-fit-height: 128px; }
 .img-fixed-xl  { -fx-fit-width: 256px; -fx-fit-height: 256px; }

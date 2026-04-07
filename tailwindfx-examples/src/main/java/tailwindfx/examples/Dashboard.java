@@ -5,23 +5,32 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import tailwindfx.TailwindFX;
+import javafx.scene.paint.Color;
+import javafx.stage.Popup;
+import tailwindfx.AnimationUtil;
 import tailwindfx.ComponentFactory;
+import tailwindfx.FxDataTable;
+import tailwindfx.TailwindFX;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Dashboard Example — Using TailwindFX Utility Classes.
- * 
- * All styling uses TailwindFX CSS classes via:
- * - node.getStyleClass().add("class-name")
- * - TailwindFX.apply(node, "class1", "class2", ...)
+ * Dashboard with Advanced Data Visualization.
+ * Features: Real charts, sparklines, interactive data table, calendar widget,
+ * toast notifications, modal dialogs, and improved UX.
  */
 public class Dashboard {
 
     private static boolean darkModeEnabled = false;
+    private static boolean sidebarCollapsed = false;
+    private static Popup notificationDropdown = null;
+    private static Popup userDropdown = null;
+    private static StackPane toastOverlay;
 
     public static BorderPane create() {
         BorderPane mainLayout = new BorderPane();
-        mainLayout.getStyleClass().add("bg-gray-100");
+        TailwindFX.jit(mainLayout, "bg-gray-100");
 
         // Sidebar
         VBox sidebar = createSidebar();
@@ -29,7 +38,7 @@ public class Dashboard {
 
         // Main content
         VBox mainContent = new VBox(0);
-        mainContent.getStyleClass().addAll("bg-gray-50");
+        TailwindFX.jit(mainContent, "bg-gray-50");
 
         // Top bar
         HBox topBar = createTopBar();
@@ -38,8 +47,8 @@ public class Dashboard {
         // Scrollable content
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
-        scrollPane.getStyleClass().addAll("bg-transparent");
-        scrollPane.setStyle("-fx-background: transparent;");
+        scrollPane.setStyle("-fx-background: transparent; -fx-border-color: transparent;");
+        
         VBox content = createContent();
         scrollPane.setContent(content);
 
@@ -50,87 +59,117 @@ public class Dashboard {
     }
 
     public static VBox createContent() {
-        VBox content = new VBox(20);
-        content.setPadding(new Insets(24));
-        content.getStyleClass().add("bg-gray-50");
+        VBox content = new VBox(28);
+        TailwindFX.jit(content, "p-8", "bg-gray-50");
 
-        // Welcome banner
+        // Welcome banner with gradients
         content.getChildren().add(createWelcomeBanner());
 
-        // Stats row
-        content.getChildren().add(createStatsRow());
+        // Stats row with sparklines
+        content.getChildren().add(createEnhancedStatsRow());
 
-        // Main content: Chart + Activity
-        HBox middleRow = new HBox(20);
-        middleRow.getChildren().addAll(
-            createChartSection(),
-            createActivityAndChat()
+        // Charts row: Line chart + Pie chart
+        HBox chartsRow = new HBox(24);
+        
+        VBox lineChart = createLineChartSection();
+        HBox.setHgrow(lineChart, Priority.ALWAYS);
+        
+        VBox pieChart = DashboardComponents.createPieChart(
+            "Traffic Sources",
+            Arrays.asList(
+                new DashboardComponents.PieSlice("Direct", 4500, Color.rgb(59, 130, 246)),
+                new DashboardComponents.PieSlice("Organic", 3200, Color.rgb(16, 185, 129)),
+                new DashboardComponents.PieSlice("Referral", 2100, Color.rgb(245, 158, 11)),
+                new DashboardComponents.PieSlice("Social", 1800, Color.rgb(139, 92, 246))
+            )
         );
-        HBox.setHgrow(createChartSection(), Priority.ALWAYS);
-        HBox.setHgrow(createActivityAndChat(), Priority.SOMETIMES);
+        
+        chartsRow.getChildren().addAll(lineChart, pieChart);
+        content.getChildren().add(chartsRow);
 
-        content.getChildren().add(middleRow);
+        // Calendar + Activity row
+        HBox widgetsRow = new HBox(24);
+        VBox calendar = DashboardComponents.createCalendarWidget();
+        HBox.setHgrow(calendar, Priority.ALWAYS);
+        
+        VBox activity = createActivityFeed();
+        HBox.setHgrow(activity, Priority.ALWAYS);
+        
+        widgetsRow.getChildren().addAll(calendar, activity);
+        content.getChildren().add(widgetsRow);
 
-        // Data table
-        content.getChildren().add(createDataTableSection());
+        // Enhanced data table
+        content.getChildren().add(createEnhancedDataTable());
 
-        // Products grid
-        content.getChildren().add(createProductsSection());
+        // Demo controls section
+        content.getChildren().add(createDemoControls());
 
         return content;
     }
 
     // =========================================================================
-    // Sidebar Navigation
+    // Sidebar (Enhanced with better UX)
     // =========================================================================
 
     private static VBox createSidebar() {
         VBox sidebar = new VBox(0);
         sidebar.setPrefWidth(280);
-        sidebar.getStyleClass().addAll("bg-gray-900");
-        sidebar.setStyle("-fx-background-color: -color-gray-900;");
+        TailwindFX.jit(sidebar, "bg-gray-900");
 
-        // Header
+        // Header with gradient
         VBox header = new VBox(16);
-        header.setPadding(new Insets(24, 20, 24, 20));
-        header.setStyle("-fx-background-color: -color-gray-800;");
+        TailwindFX.jit(header, "p-5", "bg-gradient-to-b", "from-gray-800", "to-gray-900");
 
-        // Logo
-        HBox brand = new HBox(14);
-        brand.setAlignment(Pos.CENTER_LEFT);
+        HBox headerRow = new HBox(12);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
 
+        // Enhanced logo with gradient
         StackPane logo = new StackPane();
-        logo.setPrefSize(44, 44);
-        logo.getStyleClass().addAll("bg-blue-500", "rounded-xl", "shadow-md");
-
+        logo.setPrefSize(48, 48);
+        TailwindFX.jit(logo, "bg-gradient-to-br", "from-blue-500", "to-purple-600", "rounded-xl");
+        
         Label logoText = new Label("T");
         TailwindFX.apply(logoText, "text-2xl", "font-bold", "text-white");
         logo.getChildren().add(logoText);
 
         VBox brandText = new VBox(2);
         Label brandName = new Label("TailwindFX");
-        TailwindFX.apply(brandName, "text-xl", "font-bold", "text-white");
+        TailwindFX.apply(brandName, "text-lg", "font-bold", "text-white");
 
-        Label brandSubtitle = new Label("Dashboard");
+        Label brandSubtitle = new Label("Admin Panel v2.0");
         TailwindFX.apply(brandSubtitle, "text-xs", "text-gray-400");
 
         brandText.getChildren().addAll(brandName, brandSubtitle);
-        brand.getChildren().addAll(logo, brandText);
-        header.getChildren().add(brand);
 
+        // Collapse button
+        Button collapseBtn = new Button("◀");
+        collapseBtn.setPrefSize(32, 32);
+        TailwindFX.jit(collapseBtn, "bg-gray-700", "rounded-lg", "text-sm", "text-gray-400");
+        collapseBtn.setCursor(javafx.scene.Cursor.HAND);
+        collapseBtn.setOnMouseEntered(e -> 
+            TailwindFX.jit(collapseBtn, "bg-blue-600", "rounded-lg", "text-sm", "text-white"));
+        collapseBtn.setOnMouseExited(e -> 
+            TailwindFX.jit(collapseBtn, "bg-gray-700", "rounded-lg", "text-sm", "text-gray-400"));
+        collapseBtn.setOnAction(e -> toggleSidebar(sidebar, collapseBtn));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        headerRow.getChildren().addAll(logo, brandText, spacer, collapseBtn);
+        header.getChildren().add(headerRow);
         sidebar.getChildren().add(header);
 
         // Navigation menu
-        VBox menu = new VBox(2);
-        menu.setPadding(new Insets(0, 12, 0, 12));
+        VBox menu = new VBox(4);
+        TailwindFX.jit(menu, "p-3");
 
         menu.getChildren().addAll(
             createMenuItem("📊", "Dashboard", true),
             createMenuItem("👥", "Users", false),
             createMenuItem("📦", "Products", false),
-            createMenuItem("🛒", "Orders", false),
-            createMenuItem("💬", "Messages", false, 3),
+            createMenuItem("🛒", "Orders", false, 12),
             createMenuItem("📈", "Analytics", false),
+            createMenuItem("💬", "Messages", false, 5),
             createSeparator(),
             createMenuItem("⚙️", "Settings", false),
             createMenuItem("❓", "Help", false),
@@ -155,7 +194,7 @@ public class Dashboard {
     private static HBox createMenuItem(String icon, String text, boolean active, int badge) {
         HBox item = new HBox(12);
         item.setAlignment(Pos.CENTER_LEFT);
-        item.setPadding(new Insets(14, 16, 14, 16));
+        TailwindFX.jit(item, "p-3", "px-4", "rounded-lg");
         item.setCursor(javafx.scene.Cursor.HAND);
 
         Label iconLabel = new Label(icon);
@@ -165,24 +204,22 @@ public class Dashboard {
         TailwindFX.apply(label, "text-sm", "font-medium");
 
         if (active) {
-            item.setStyle("-fx-background-color: -color-blue-600;");
-            item.getStyleClass().addAll("rounded-lg");
+            TailwindFX.jit(item, "bg-blue-600", "rounded-lg");
             TailwindFX.apply(iconLabel, "text-white");
             TailwindFX.apply(label, "text-white");
         } else {
             TailwindFX.apply(iconLabel, "text-gray-400");
             TailwindFX.apply(label, "text-gray-400");
-            
+
             item.setOnMouseEntered(e -> {
-                item.setStyle("-fx-background-color: -color-gray-800;");
-                item.getStyleClass().addAll("rounded-lg");
-                iconLabel.setStyle("-fx-text-fill: -color-white;");
-                label.setStyle("-fx-text-fill: -color-white;");
+                TailwindFX.jit(item, "bg-gray-800", "rounded-lg");
+                TailwindFX.apply(iconLabel, "text-white");
+                TailwindFX.apply(label, "text-white");
             });
             item.setOnMouseExited(e -> {
-                item.setStyle("");
-                iconLabel.setStyle("-fx-text-fill: -color-gray-400;");
-                label.setStyle("-fx-text-fill: -color-gray-400;");
+                TailwindFX.jit(item, "rounded-lg");
+                TailwindFX.apply(iconLabel, "text-gray-400");
+                TailwindFX.apply(label, "text-gray-400");
             });
         }
 
@@ -197,8 +234,8 @@ public class Dashboard {
             item.getChildren().add(spacer);
 
             StackPane badgePane = new StackPane();
-            badgePane.setPrefSize(22, 22);
-            badgePane.getStyleClass().addAll("bg-red-500", "rounded-full");
+            badgePane.setPrefSize(20, 20);
+            TailwindFX.jit(badgePane, "bg-red-500", "rounded-full");
 
             Label badgeLabel = new Label(String.valueOf(badge));
             TailwindFX.apply(badgeLabel, "text-xs", "font-bold", "text-white");
@@ -213,16 +250,14 @@ public class Dashboard {
     private static Region createSeparator() {
         Region separator = new Region();
         separator.setPrefHeight(1);
-        separator.setStyle("-fx-background-color: -color-gray-800;");
-        separator.setPadding(new Insets(12, 16, 12, 16));
+        TailwindFX.jit(separator, "bg-gray-800", "py-3", "px-4");
         return separator;
     }
 
     private static VBox createUserProfile() {
         VBox profile = new VBox(12);
         profile.setAlignment(Pos.CENTER_LEFT);
-        profile.setPadding(new Insets(20));
-        profile.setStyle("-fx-background-color: -color-gray-800;");
+        TailwindFX.jit(profile, "p-5", "bg-gray-800");
 
         HBox info = new HBox(12);
         info.setAlignment(Pos.CENTER_LEFT);
@@ -244,131 +279,464 @@ public class Dashboard {
         return profile;
     }
 
+    private static void toggleSidebar(VBox sidebar, Button collapseBtn) {
+        sidebarCollapsed = !sidebarCollapsed;
+
+        if (sidebarCollapsed) {
+            sidebar.setPrefWidth(80);
+            collapseBtn.setText("▶");
+        } else {
+            sidebar.setPrefWidth(280);
+            collapseBtn.setText("◀");
+        }
+    }
+
     // =========================================================================
-    // Top Bar
+    // Top Bar (Enhanced)
     // =========================================================================
 
     private static HBox createTopBar() {
-        HBox topBar = new HBox(20);
+        HBox topBar = new HBox(24);
         topBar.setAlignment(Pos.CENTER);
-        topBar.setPadding(new Insets(20, 32, 20, 32));
-        topBar.getStyleClass().addAll("bg-white", "shadow-md");
+        TailwindFX.jit(topBar, "p-3", "px-6", "bg-gradient-to-b", "from-white", "to-gray-50", "rounded-b-2xl");
 
-        // Breadcrumbs
-        HBox breadcrumbs = new HBox(8);
-        breadcrumbs.setAlignment(Pos.CENTER_LEFT);
+        // Breadcrumb
+        HBox breadcrumb = createBreadcrumb();
 
-        Label home = new Label("🏠 Home");
-        TailwindFX.apply(home, "text-sm", "text-gray-500");
-
-        Label separator = new Label("/");
-        TailwindFX.apply(separator, "text-sm", "text-gray-400");
-
-        Label dashboard = new Label("Dashboard");
-        TailwindFX.apply(dashboard, "text-sm", "font-medium", "text-gray-900");
-
-        breadcrumbs.getChildren().addAll(home, separator, dashboard);
-
-        // Right side actions
-        HBox actions = new HBox(16);
-        actions.setAlignment(Pos.CENTER);
-
-        // Date display
-        VBox dateBox = new VBox(2);
-        dateBox.setAlignment(Pos.CENTER_RIGHT);
-        Label dateLabel = new Label("Monday, March 30, 2026");
-        TailwindFX.apply(dateLabel, "text-xs", "text-gray-500");
-        Label timeLabel = new Label("10:30 AM");
-        TailwindFX.apply(timeLabel, "text-xs", "font-medium", "text-gray-700");
-        dateBox.getChildren().addAll(dateLabel, timeLabel);
-
-        // Separator line
-        Region lineSeparator = new Region();
-        lineSeparator.setPrefWidth(1);
-        lineSeparator.setPrefHeight(30);
-        lineSeparator.getStyleClass().addAll("bg-gray-200");
-        lineSeparator.setPadding(new Insets(0, 16, 0, 16));
-
-        // Theme toggle
-        Button themeToggle = createThemeToggle();
-
-        // Notifications
-        StackPane notificationBtn = createNotificationButton();
-
-        // User menu
-        HBox userMenu = new HBox(12);
-        userMenu.setAlignment(Pos.CENTER);
-        userMenu.setPadding(new Insets(8, 16, 8, 16));
-        userMenu.getStyleClass().addAll("bg-gray-100", "rounded-xl");
-        userMenu.setCursor(javafx.scene.Cursor.HAND);
-
-        VBox userText = new VBox(2);
-        userText.setAlignment(Pos.CENTER_RIGHT);
-        Label userName = new Label("John Doe");
-        TailwindFX.apply(userName, "text-sm", "font-semibold", "text-gray-700");
-        Label userRole = new Label("Administrator");
-        TailwindFX.apply(userRole, "text-xs", "text-gray-500");
-        userText.getChildren().addAll(userName, userRole);
-
-        StackPane userAvatar = ComponentFactory.avatar("JD", "blue", 40);
-        TailwindFX.apply(userAvatar, "rounded-full");
-
-        userMenu.getChildren().addAll(userText, userAvatar);
-
-        actions.getChildren().addAll(dateBox, lineSeparator, themeToggle, notificationBtn, userMenu);
+        // Search box
+        HBox searchBox = createSearchBox();
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        topBar.getChildren().addAll(breadcrumbs, spacer, actions);
+        // Right actions
+        HBox actions = new HBox(12);
+        actions.setAlignment(Pos.CENTER);
+
+        Button quickActionsBtn = createQuickActionsButton();
+        StackPane notificationBtn = createNotificationButtonWithDropdown();
+        Button themeToggle = createThemeToggle();
+
+        Region vSeparator = new Region();
+        vSeparator.setPrefWidth(1);
+        vSeparator.setPrefHeight(32);
+        TailwindFX.jit(vSeparator, "bg-gray-200");
+
+        HBox userMenu = createUserMenuWithDropdown();
+
+        actions.getChildren().addAll(quickActionsBtn, notificationBtn, themeToggle, vSeparator, userMenu);
+
+        topBar.getChildren().addAll(breadcrumb, searchBox, spacer, actions);
         return topBar;
+    }
+
+    private static HBox createBreadcrumb() {
+        HBox breadcrumb = new HBox(8);
+        breadcrumb.setAlignment(Pos.CENTER_LEFT);
+
+        String[] items = {"Home", "Dashboard", "Overview"};
+        for (int i = 0; i < items.length; i++) {
+            Label item = new Label(items[i]);
+            if (i == items.length - 1) {
+                TailwindFX.apply(item, "text-sm", "font-semibold", "text-blue-600");
+            } else {
+                TailwindFX.apply(item, "text-sm", "text-gray-500");
+                item.setCursor(javafx.scene.Cursor.HAND);
+                final boolean isLast = i == items.length - 1;
+                item.setOnMouseEntered(e -> {
+                    if (!isLast) {
+                        TailwindFX.apply(item, "text-blue-600");
+                        item.setUnderline(true);
+                    }
+                });
+                item.setOnMouseExited(e -> {
+                    if (!isLast) {
+                        TailwindFX.apply(item, "text-gray-500");
+                        item.setUnderline(false);
+                    }
+                });
+            }
+            breadcrumb.getChildren().add(item);
+
+            if (i < items.length - 1) {
+                Label separator = new Label("/");
+                TailwindFX.apply(separator, "text-sm", "text-gray-400");
+                breadcrumb.getChildren().add(separator);
+            }
+        }
+
+        return breadcrumb;
+    }
+
+    private static HBox createSearchBox() {
+        HBox searchBox = new HBox(10);
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        TailwindFX.jit(searchBox, "p-2", "px-3", "bg-gray-100", "rounded-xl", "border-2", "border-transparent");
+        searchBox.setPrefWidth(320);
+        searchBox.setCursor(javafx.scene.Cursor.TEXT);
+
+        Label searchIcon = new Label("🔍");
+        TailwindFX.apply(searchIcon, "text-sm");
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search anything... (Ctrl+K)");
+        TailwindFX.jit(searchField, "bg-transparent", "text-sm");
+        searchField.setStyle("-fx-prompt-text-fill: -color-gray-400; -fx-text-fill: -color-gray-900;");
+        searchField.setPrefWidth(270);
+        
+        // Add keyboard shortcut
+        searchField.setOnKeyPressed(e -> {
+            if (e.isControlDown() && e.getCode() == javafx.scene.input.KeyCode.K) {
+                searchField.requestFocus();
+                searchField.selectAll();
+            }
+        });
+
+        Button quickSearchBtn = new Button("⚡");
+        quickSearchBtn.setPrefSize(28, 28);
+        TailwindFX.jit(quickSearchBtn, "bg-blue-500", "rounded-lg", "text-xs");
+        quickSearchBtn.setCursor(javafx.scene.Cursor.HAND);
+        quickSearchBtn.setOnMouseEntered(e -> TailwindFX.jit(quickSearchBtn, "bg-blue-600", "rounded-lg"));
+        quickSearchBtn.setOnMouseExited(e -> TailwindFX.jit(quickSearchBtn, "bg-blue-500", "rounded-lg"));
+        quickSearchBtn.setOnAction(e -> 
+            DashboardComponents.showToast("Searching: " + searchField.getText(), 
+                DashboardComponents.ToastType.INFO));
+
+        searchBox.getChildren().addAll(searchIcon, searchField, quickSearchBtn);
+
+        searchBox.setOnMouseEntered(e -> {
+            TailwindFX.jit(searchBox, "bg-white", "rounded-xl", "border-blue-200");
+        });
+        searchBox.setOnMouseExited(e -> {
+            TailwindFX.jit(searchBox, "bg-gray-100", "rounded-xl", "border-transparent");
+        });
+
+        return searchBox;
+    }
+
+    private static StackPane createNotificationButtonWithDropdown() {
+        StackPane btnWrapper = new StackPane();
+        btnWrapper.setPrefSize(44, 44);
+        TailwindFX.jit(btnWrapper, "bg-gray-100", "rounded-xl");
+        btnWrapper.setCursor(javafx.scene.Cursor.HAND);
+
+        Label bell = new Label("🔔");
+        TailwindFX.apply(bell, "text-lg");
+        btnWrapper.getChildren().add(bell);
+
+        StackPane badge = new StackPane();
+        badge.setPrefSize(20, 20);
+        TailwindFX.jit(badge, "bg-gradient-to-br", "from-red-500", "to-red-600", "rounded-full");
+
+        Label badgeCount = new Label("3");
+        TailwindFX.apply(badgeCount, "text-xs", "font-bold", "text-white");
+        badge.getChildren().add(badgeCount);
+
+        StackPane.setAlignment(badge, Pos.TOP_RIGHT);
+        btnWrapper.getChildren().add(badge);
+
+        btnWrapper.setOnMouseEntered(e -> 
+            TailwindFX.jit(btnWrapper, "bg-blue-50", "rounded-xl", "border-blue-200"));
+        btnWrapper.setOnMouseExited(e -> 
+            TailwindFX.jit(btnWrapper, "bg-gray-100", "rounded-xl"));
+
+        btnWrapper.setOnMouseClicked(e -> {
+            DashboardComponents.showToast("You have 3 new notifications", 
+                DashboardComponents.ToastType.INFO);
+            showNotificationDropdown(btnWrapper);
+        });
+
+        return btnWrapper;
+    }
+
+    private static void showNotificationDropdown(StackPane anchor) {
+        if (notificationDropdown != null && notificationDropdown.isShowing()) {
+            notificationDropdown.hide();
+            return;
+        }
+
+        VBox dropdown = new VBox(0);
+        dropdown.setPrefWidth(340);
+        TailwindFX.jit(dropdown, "bg-white", "rounded-xl", "shadow-2xl");
+
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+        TailwindFX.jit(header, "p-4", "bg-gray-50", "rounded-t-xl");
+
+        Label title = new Label("Notifications");
+        TailwindFX.apply(title, "text-sm", "font-bold", "text-gray-900");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label markAllRead = new Label("Mark all read");
+        TailwindFX.apply(markAllRead, "text-xs", "text-blue-600");
+        markAllRead.setCursor(javafx.scene.Cursor.HAND);
+        markAllRead.setOnMouseClicked(e -> {
+            DashboardComponents.showToast("All notifications marked as read", 
+                DashboardComponents.ToastType.SUCCESS);
+            notificationDropdown.hide();
+        });
+
+        header.getChildren().addAll(title, spacer, markAllRead);
+
+        Separator sep1 = new Separator();
+        TailwindFX.jit(sep1, "bg-gray-200");
+
+        VBox notifications = new VBox(0);
+        notifications.getChildren().addAll(
+            createNotificationItem("👤", "New user registered", "2 minutes ago", false),
+            createNotificationItem("💳", "Payment received - $1,250", "15 minutes ago", false),
+            createNotificationItem("📄", "Report generated successfully", "1 hour ago", false),
+            createNotificationItem("⚙️", "System update completed", "3 hours ago", true)
+        );
+
+        Separator sep2 = new Separator();
+        TailwindFX.jit(sep2, "bg-gray-200");
+
+        HBox footer = new HBox();
+        footer.setAlignment(Pos.CENTER);
+        TailwindFX.jit(footer, "p-3");
+
+        Label viewAll = new Label("View all notifications");
+        TailwindFX.apply(viewAll, "text-sm", "font-medium", "text-blue-600");
+        viewAll.setCursor(javafx.scene.Cursor.HAND);
+
+        footer.getChildren().add(viewAll);
+        dropdown.getChildren().addAll(header, sep1, notifications, sep2, footer);
+
+        notificationDropdown = new Popup();
+        notificationDropdown.getContent().add(dropdown);
+        notificationDropdown.setHideOnEscape(true);
+
+        javafx.geometry.Point2D anchorScreen = anchor.localToScreen(
+            anchor.getBoundsInLocal().getMaxX(), 
+            anchor.getBoundsInLocal().getMaxY());
+        notificationDropdown.show(anchor, anchorScreen.getX() - 340, anchorScreen.getY() + 5);
+    }
+
+    private static VBox createNotificationItem(String icon, String message, String time, boolean read) {
+        HBox item = new HBox(12);
+        item.setAlignment(Pos.CENTER_LEFT);
+        TailwindFX.jit(item, "p-3", "px-4");
+        item.setCursor(javafx.scene.Cursor.HAND);
+
+        if (!read) {
+            TailwindFX.jit(item, "bg-blue-50");
+        }
+
+        StackPane iconBox = new StackPane();
+        iconBox.setPrefSize(36, 36);
+        TailwindFX.jit(iconBox, "bg-white", "rounded-lg");
+        Label iconLabel = new Label(icon);
+        iconBox.getChildren().add(iconLabel);
+
+        VBox content = new VBox(2);
+        Label msgLabel = new Label(message);
+        TailwindFX.apply(msgLabel, "text-sm", "text-gray-900");
+        Label timeLabel = new Label(time);
+        TailwindFX.apply(timeLabel, "text-xs", "text-gray-500");
+        content.getChildren().addAll(msgLabel, timeLabel);
+
+        if (!read) {
+            StackPane unreadDot = new StackPane();
+            unreadDot.setPrefSize(8, 8);
+            TailwindFX.jit(unreadDot, "bg-blue-500", "rounded-full");
+            item.getChildren().add(unreadDot);
+        }
+
+        item.getChildren().addAll(iconBox, content);
+
+        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50"));
+        item.setOnMouseExited(e -> TailwindFX.jit(item, read ? "bg-transparent" : "bg-blue-50"));
+        item.setOnMouseClicked(e -> notificationDropdown.hide());
+
+        VBox wrapper = new VBox(item);
+        return wrapper;
+    }
+
+    private static Button createQuickActionsButton() {
+        Button btn = new Button("➕");
+        btn.setPrefSize(44, 44);
+        TailwindFX.jit(btn, "bg-gray-100", "rounded-xl");
+        btn.setCursor(javafx.scene.Cursor.HAND);
+
+        btn.setOnMouseEntered(e -> TailwindFX.jit(btn, "bg-blue-500", "rounded-xl"));
+        btn.setOnMouseExited(e -> TailwindFX.jit(btn, "bg-gray-100", "rounded-xl"));
+        
+        btn.setOnAction(e -> 
+            DashboardComponents.showToast("Quick actions menu opened", 
+                DashboardComponents.ToastType.INFO));
+
+        return btn;
     }
 
     private static Button createThemeToggle() {
         Button toggle = new Button(darkModeEnabled ? "🌙" : "☀️");
         toggle.setPrefSize(44, 44);
-        toggle.getStyleClass().addAll("bg-gray-100", "rounded-xl");
+        TailwindFX.jit(toggle, "bg-gray-100", "rounded-xl");
         toggle.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(toggle, "text-xl");
-        toggle.setOnMouseEntered(e -> toggle.setStyle("-fx-background-color: -color-gray-200; -fx-background-radius: 12;"));
-        toggle.setOnMouseExited(e -> toggle.setStyle("-fx-background-color: -color-gray-100; -fx-background-radius: 12;"));
+
+        toggle.setOnMouseEntered(e -> TailwindFX.jit(toggle, "bg-blue-50", "rounded-xl"));
+        toggle.setOnMouseExited(e -> TailwindFX.jit(toggle, "bg-gray-100", "rounded-xl"));
+
         toggle.setOnAction(e -> {
             darkModeEnabled = !darkModeEnabled;
             toggle.setText(darkModeEnabled ? "🌙" : "☀️");
             if (toggle.getScene() != null) {
                 Node root = toggle.getScene().getRoot();
                 if (darkModeEnabled) {
-                    root.getStyleClass().add("dark");
+                    if (!root.getStyleClass().contains("dark")) {
+                        root.getStyleClass().add("dark");
+                    }
                 } else {
                     root.getStyleClass().remove("dark");
                 }
             }
+            DashboardComponents.showToast(
+                darkModeEnabled ? "Dark mode enabled" : "Light mode enabled",
+                DashboardComponents.ToastType.INFO);
         });
         return toggle;
     }
 
-    private static StackPane createNotificationButton() {
-        StackPane btnWrapper = new StackPane();
-        btnWrapper.setPrefSize(44, 44);
-        btnWrapper.getStyleClass().addAll("bg-gray-100", "rounded-xl");
-        btnWrapper.setCursor(javafx.scene.Cursor.HAND);
+    private static HBox createUserMenuWithDropdown() {
+        HBox userMenu = new HBox(10);
+        userMenu.setAlignment(Pos.CENTER);
+        TailwindFX.jit(userMenu, "p-1", "px-2", "bg-gray-100", "rounded-xl");
+        userMenu.setCursor(javafx.scene.Cursor.HAND);
 
-        Label bell = new Label("🔔");
-        TailwindFX.apply(bell, "text-xl");
-        btnWrapper.getChildren().add(bell);
+        VBox userText = new VBox(2);
+        userText.setAlignment(Pos.CENTER_LEFT);
+        Label userName = new Label("John Doe");
+        TailwindFX.apply(userName, "text-sm", "font-semibold", "text-gray-900");
+        Label userRole = new Label("Admin");
+        TailwindFX.apply(userRole, "text-xs", "text-gray-500");
+        userText.getChildren().addAll(userName, userRole);
 
-        // Notification dot
-        StackPane badge = new StackPane();
-        badge.setPrefSize(12, 12);
-        badge.getStyleClass().addAll("bg-red-500", "rounded-full");
+        StackPane userAvatar = ComponentFactory.avatar("JD", "blue", 38);
+        TailwindFX.apply(userAvatar, "rounded-full");
 
-        StackPane.setAlignment(badge, Pos.TOP_RIGHT);
-        btnWrapper.getChildren().add(badge);
+        Label dropdownArrow = new Label("▼");
+        TailwindFX.apply(dropdownArrow, "text-xs", "text-gray-400");
 
-        btnWrapper.setOnMouseEntered(e -> btnWrapper.setStyle("-fx-background-color: -color-gray-200; -fx-background-radius: 12;"));
-        btnWrapper.setOnMouseExited(e -> btnWrapper.setStyle("-fx-background-color: -color-gray-100; -fx-background-radius: 12;"));
+        userMenu.getChildren().addAll(userText, userAvatar, dropdownArrow);
 
-        return btnWrapper;
+        userMenu.setOnMouseEntered(e -> 
+            TailwindFX.jit(userMenu, "bg-white", "rounded-xl", "border-blue-200"));
+        userMenu.setOnMouseExited(e -> 
+            TailwindFX.jit(userMenu, "bg-gray-100", "rounded-xl"));
+
+        userMenu.setOnMouseClicked(e -> showUserDropdown(userMenu));
+
+        return userMenu;
+    }
+
+    private static void showUserDropdown(HBox anchor) {
+        if (userDropdown != null && userDropdown.isShowing()) {
+            userDropdown.hide();
+            return;
+        }
+
+        VBox dropdown = new VBox(0);
+        dropdown.setPrefWidth(280);
+        TailwindFX.jit(dropdown, "bg-white", "rounded-xl", "shadow-2xl");
+
+        HBox header = new HBox(12);
+        header.setAlignment(Pos.CENTER_LEFT);
+        TailwindFX.jit(header, "p-4", "bg-gradient-to-r", "from-blue-50", "to-purple-50", "rounded-t-xl");
+
+        StackPane avatar = ComponentFactory.avatar("JD", "blue", 50);
+        TailwindFX.apply(avatar, "rounded-full");
+
+        VBox userInfo = new VBox(4);
+        Label name = new Label("John Doe");
+        TailwindFX.apply(name, "text-base", "font-bold", "text-gray-900");
+        Label email = new Label("john@example.com");
+        TailwindFX.apply(email, "text-xs", "text-gray-600");
+        userInfo.getChildren().addAll(name, email);
+
+        header.getChildren().addAll(avatar, userInfo);
+
+        Separator sep1 = new Separator();
+        TailwindFX.jit(sep1, "bg-gray-200");
+
+        VBox menuItems = new VBox(0);
+        menuItems.getChildren().addAll(
+            createDropdownMenuItem("👤", "My Profile", "Manage your account", 
+                () -> DashboardComponents.showToast("Opening profile...", DashboardComponents.ToastType.INFO)),
+            createDropdownMenuItem("⚙️", "Settings", "Preferences and security",
+                () -> DashboardComponents.showToast("Opening settings...", DashboardComponents.ToastType.INFO)),
+            createDropdownMenuItem("💳", "Billing", "Payment and subscription",
+                () -> DashboardComponents.showToast("Opening billing...", DashboardComponents.ToastType.INFO)),
+            createDropdownMenuItem("❓", "Help Center", "FAQs and support",
+                () -> DashboardComponents.showToast("Opening help...", DashboardComponents.ToastType.INFO))
+        );
+
+        Separator sep2 = new Separator();
+        TailwindFX.jit(sep2, "bg-gray-200");
+
+        HBox logoutItem = new HBox(12);
+        logoutItem.setAlignment(Pos.CENTER_LEFT);
+        TailwindFX.jit(logoutItem, "p-3", "px-4");
+        logoutItem.setCursor(javafx.scene.Cursor.HAND);
+
+        Label logoutIcon = new Label("🚪");
+        TailwindFX.apply(logoutIcon, "text-base");
+
+        VBox logoutText = new VBox(2);
+        Label logoutTitle = new Label("Sign out");
+        TailwindFX.apply(logoutTitle, "text-sm", "font-medium", "text-red-600");
+        Label logoutDesc = new Label("Log out of your account");
+        TailwindFX.apply(logoutDesc, "text-xs", "text-gray-500");
+        logoutText.getChildren().addAll(logoutTitle, logoutDesc);
+
+        logoutItem.getChildren().addAll(logoutIcon, logoutText);
+        logoutItem.setOnMouseEntered(e -> TailwindFX.jit(logoutItem, "bg-red-50"));
+        logoutItem.setOnMouseExited(e -> TailwindFX.jit(logoutItem, "bg-transparent"));
+        logoutItem.setOnMouseClicked(e -> {
+            DashboardComponents.showToast("Signing out...", DashboardComponents.ToastType.SUCCESS);
+            userDropdown.hide();
+        });
+
+        dropdown.getChildren().addAll(header, sep1, menuItems, sep2, logoutItem);
+
+        userDropdown = new Popup();
+        userDropdown.getContent().add(dropdown);
+        userDropdown.setHideOnEscape(true);
+
+        javafx.geometry.Point2D anchorScreen = anchor.localToScreen(
+            anchor.getBoundsInLocal().getMaxX(), 
+            anchor.getBoundsInLocal().getMaxY());
+        userDropdown.show(anchor, anchorScreen.getX() - 280, anchorScreen.getY() + 5);
+    }
+
+    private static HBox createDropdownMenuItem(String icon, String title, String description, Runnable action) {
+        HBox item = new HBox(12);
+        item.setAlignment(Pos.CENTER_LEFT);
+        TailwindFX.jit(item, "p-3", "px-4", "bg-transparent");
+        item.setCursor(javafx.scene.Cursor.HAND);
+
+        Label iconLabel = new Label(icon);
+        TailwindFX.apply(iconLabel, "text-base");
+
+        VBox text = new VBox(2);
+        Label titleLabel = new Label(title);
+        TailwindFX.apply(titleLabel, "text-sm", "font-medium", "text-gray-900");
+        Label descLabel = new Label(description);
+        TailwindFX.apply(descLabel, "text-xs", "text-gray-500");
+        text.getChildren().addAll(titleLabel, descLabel);
+
+        item.getChildren().addAll(iconLabel, text);
+
+        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50"));
+        item.setOnMouseExited(e -> TailwindFX.jit(item, "bg-transparent"));
+        item.setOnMouseClicked(e -> {
+            action.run();
+            userDropdown.hide();
+        });
+
+        return item;
     }
 
     // =========================================================================
@@ -378,715 +746,311 @@ public class Dashboard {
     private static HBox createWelcomeBanner() {
         HBox banner = new HBox(24);
         banner.setAlignment(Pos.CENTER_LEFT);
-        banner.setPadding(new Insets(24, 32, 24, 32));
-        banner.setStyle("-fx-background-color: linear-gradient(to right, -color-blue-500, -color-purple-500);");
-        banner.getStyleClass().addAll("rounded-xl", "shadow-lg");
+        TailwindFX.jit(banner, "p-8", "px-10", "bg-gradient-to-r", "from-blue-600", "to-purple-700", "rounded-2xl");
 
         VBox text = new VBox(8);
         Label title = new Label("Welcome back, John! 👋");
-        TailwindFX.apply(title, "text-2xl", "font-bold", "text-white");
+        TailwindFX.apply(title, "text-3xl", "font-bold", "text-white");
 
         Label subtitle = new Label("Here's what's happening with your business today.");
-        TailwindFX.apply(subtitle, "text-sm", "text-blue-100");
+        TailwindFX.apply(subtitle, "text-base", "text-blue-100");
 
         text.getChildren().addAll(title, subtitle);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button actionBtn = new Button("📊 View Reports");
-        actionBtn.getStyleClass().addAll("bg-white", "rounded-lg");
-        actionBtn.setPadding(new Insets(12, 24, 12, 24));
-        actionBtn.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(actionBtn, "text-sm", "font-semibold", "text-blue-600");
+        HBox actions = new HBox(12);
+        Button reportsBtn = new Button("📊 View Reports");
+        TailwindFX.jit(reportsBtn, "bg-white", "rounded-xl", "text-sm", "font-semibold", "text-blue-600", "p-3", "px-6");
+        reportsBtn.setCursor(javafx.scene.Cursor.HAND);
+        reportsBtn.setOnMouseEntered(e -> TailwindFX.jit(reportsBtn, "bg-blue-50", "rounded-xl"));
+        reportsBtn.setOnMouseExited(e -> TailwindFX.jit(reportsBtn, "bg-white", "rounded-xl"));
+        reportsBtn.setOnAction(e -> 
+            DashboardComponents.showToast("Opening reports...", DashboardComponents.ToastType.INFO));
 
-        banner.getChildren().addAll(text, spacer, actionBtn);
+        Button exportBtn = new Button("📥 Export Data");
+        TailwindFX.jit(exportBtn, "bg-blue-700", "rounded-xl", "text-sm", "font-semibold", "text-white", "p-3", "px-6");
+        exportBtn.setCursor(javafx.scene.Cursor.HAND);
+        exportBtn.setOnMouseEntered(e -> TailwindFX.jit(exportBtn, "bg-blue-800", "rounded-xl"));
+        exportBtn.setOnMouseExited(e -> TailwindFX.jit(exportBtn, "bg-blue-700", "rounded-xl"));
+        exportBtn.setOnAction(e -> 
+            DashboardComponents.showToast("Exporting data...", DashboardComponents.ToastType.SUCCESS));
+
+        actions.getChildren().addAll(reportsBtn, exportBtn);
+
+        banner.getChildren().addAll(text, spacer, actions);
         return banner;
     }
 
     // =========================================================================
-    // Stats Row
+    // Enhanced Stats Row with Sparklines
     // =========================================================================
 
-    private static HBox createStatsRow() {
+    private static HBox createEnhancedStatsRow() {
         HBox stats = new HBox(20);
 
         stats.getChildren().addAll(
-            createStatCard("💰", "Total Revenue", "$45,231", "+20.1%", "green"),
-            createStatCard("👥", "Active Users", "2,350", "+15.2%", "blue"),
-            createStatCard("📊", "Bounce Rate", "12.5%", "-3.2%", "purple"),
-            createStatCard("⏱️", "Avg. Session", "4m 32s", "+8.4%", "amber")
+            DashboardComponents.createStatCardWithSparkline(
+                "Total Revenue", "$45,231", "+20.1%", true,
+                Arrays.asList(30.0, 35.0, 32.0, 40.0, 38.0, 42.0, 45.0),
+                Color.rgb(34, 197, 94)),
+            DashboardComponents.createStatCardWithSparkline(
+                "Active Users", "2,350", "+15.2%", true,
+                Arrays.asList(20.0, 22.0, 21.0, 23.0, 24.0, 23.5, 25.0),
+                Color.rgb(59, 130, 246)),
+            DashboardComponents.createStatCardWithSparkline(
+                "Bounce Rate", "12.5%", "-3.2%", false,
+                Arrays.asList(15.0, 14.5, 14.0, 13.5, 13.0, 12.8, 12.5),
+                Color.rgb(139, 92, 246)),
+            DashboardComponents.createStatCardWithSparkline(
+                "Avg. Session", "4m 32s", "+8.4%", true,
+                Arrays.asList(3.8, 4.0, 4.1, 4.2, 4.15, 4.25, 4.32),
+                Color.rgb(245, 158, 11))
         );
 
         return stats;
     }
 
-    private static StackPane createStatCard(String icon, String title, String value, String change, String color) {
-        VBox card = new VBox(16);
-        card.getStyleClass().addAll("card", "shadow-md");
-        card.setPadding(new Insets(24));
-        card.setCursor(javafx.scene.Cursor.HAND);
-
-        // Header with icon and title
-        HBox header = new HBox(12);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        StackPane iconBox = new StackPane();
-        iconBox.setPrefSize(48, 48);
-        iconBox.getStyleClass().addAll("bg-blue-50", "rounded-xl");
-
-        Label iconLabel = new Label(icon);
-        TailwindFX.apply(iconLabel, "text-2xl");
-        iconBox.getChildren().add(iconLabel);
-
-        Label titleLabel = new Label(title);
-        TailwindFX.apply(titleLabel, "text-sm", "font-medium", "text-gray-500");
-
-        header.getChildren().addAll(iconBox, titleLabel);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // Change badge
-        boolean isPositive = change.startsWith("+");
-        StackPane changeBadge = new StackPane();
-        changeBadge.setPadding(new Insets(6, 12, 6, 12));
-        changeBadge.getStyleClass().addAll(isPositive ? "bg-green-100" : "bg-red-100", "rounded-full");
-        Label changeLabel = new Label(change);
-        TailwindFX.apply(changeLabel, "text-xs", "font-bold", isPositive ? "text-green-700" : "text-red-700");
-        changeBadge.getChildren().add(changeLabel);
-
-        card.getChildren().addAll(header, changeBadge);
-
-        // Value
-        Label valueLabel = new Label(value);
-        TailwindFX.apply(valueLabel, "text-3xl", "font-bold", "text-gray-900");
-        card.getChildren().add(valueLabel);
-
-        StackPane wrapper = new StackPane(card);
-        HBox.setHgrow(wrapper, Priority.ALWAYS);
-        return wrapper;
-    }
-
     // =========================================================================
-    // Chart Section
+    // Line Chart Section
     // =========================================================================
 
-    private static VBox createChartSection() {
-        VBox section = new VBox(20);
-        section.getStyleClass().addAll("card", "shadow-md");
-        section.setPadding(new Insets(24));
+    private static VBox createLineChartSection() {
+        List<String> labels = Arrays.asList("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul");
+        
+        List<DashboardComponents.ChartData> datasets = Arrays.asList(
+            new DashboardComponents.ChartData(
+                "Revenue",
+                Arrays.asList(35.0, 42.0, 38.0, 50.0, 45.0, 55.0, 48.0),
+                Color.rgb(59, 130, 246)),
+            new DashboardComponents.ChartData(
+                "Expenses",
+                Arrays.asList(20.0, 25.0, 22.0, 28.0, 26.0, 30.0, 27.0),
+                Color.rgb(239, 68, 68))
+        );
 
-        // Section header
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        VBox titleBox = new VBox(4);
-        Label title = new Label("Revenue Overview");
-        TailwindFX.apply(title, "text-lg", "font-bold", "text-gray-900");
-        Label subtitle = new Label("Monthly revenue performance");
-        TailwindFX.apply(subtitle, "text-sm", "text-gray-500");
-        titleBox.getChildren().addAll(title, subtitle);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox periodSelector = new HBox(2);
-        periodSelector.getStyleClass().addAll("bg-gray-100", "rounded-lg");
-        String[] periods = {"7D", "30D", "90D"};
-        for (int i = 0; i < periods.length; i++) {
-            Button btn = new Button(periods[i]);
-            btn.getStyleClass().addAll(i == 0 ? "bg-blue-500" : "bg-transparent", "rounded-md");
-            btn.setPadding(new Insets(8, 16, 8, 16));
-            btn.setCursor(javafx.scene.Cursor.HAND);
-            Label btnLabel = new Label(periods[i]);
-            TailwindFX.apply(btnLabel, "text-xs", "font-medium", i == 0 ? "text-white" : "text-gray-600");
-            btn.setGraphic(btnLabel);
-            periodSelector.getChildren().add(btn);
-        }
-
-        header.getChildren().addAll(titleBox, periodSelector);
-
-        // Simulated bar chart
-        HBox chartContainer = createSimulatedBarChart();
-
-        section.getChildren().addAll(header, chartContainer);
-        return section;
-    }
-
-    private static HBox createSimulatedBarChart() {
-        HBox chart = new HBox(12);
-        chart.setAlignment(Pos.BOTTOM_CENTER);
-        chart.setPadding(new Insets(20, 10, 10, 10));
-        chart.setPrefHeight(280);
-
-        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"};
-        double[] values = {0.6, 0.8, 0.45, 0.9, 0.75, 0.95, 0.85};
-
-        for (int i = 0; i < months.length; i++) {
-            VBox barContainer = new VBox(8);
-            barContainer.setAlignment(Pos.BOTTOM_CENTER);
-            barContainer.setPrefWidth(50);
-
-            // Bar
-            StackPane bar = new StackPane();
-            bar.setPrefWidth(36);
-            bar.setPrefHeight(values[i] * 200);
-            bar.getStyleClass().addAll("bg-blue-500", "rounded-t-lg");
-            bar.setStyle("-fx-background-color: -color-blue-500;");
-            bar.setCursor(javafx.scene.Cursor.HAND);
-
-            bar.setOnMouseEntered(e -> bar.setStyle("-fx-background-color: -color-blue-600;"));
-            bar.setOnMouseExited(e -> bar.setStyle("-fx-background-color: -color-blue-500;"));
-
-            // Month label
-            Label monthLabel = new Label(months[i]);
-            TailwindFX.apply(monthLabel, "text-xs", "font-medium", "text-gray-500");
-
-            barContainer.getChildren().addAll(bar, monthLabel);
-            chart.getChildren().add(barContainer);
-        }
-
+        VBox chart = DashboardComponents.createLineChart("Revenue vs Expenses", datasets, labels);
+        HBox.setHgrow(chart, Priority.ALWAYS);
         return chart;
     }
 
     // =========================================================================
-    // Activity and Chat Panel
+    // Activity Feed
     // =========================================================================
 
-    private static VBox createActivityAndChat() {
-        VBox panel = new VBox(20);
-        panel.setPrefWidth(380);
-
-        panel.getChildren().add(createRecentActivity());
-        panel.getChildren().add(createQuickChat());
-
-        return panel;
-    }
-
-    private static VBox createRecentActivity() {
+    private static VBox createActivityFeed() {
         VBox section = new VBox(16);
-        section.getStyleClass().addAll("card", "shadow-md");
-        section.setPadding(new Insets(20));
+        TailwindFX.jit(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
-        // Header
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
 
         Label title = new Label("Recent Activity");
-        TailwindFX.apply(title, "text-base", "font-bold", "text-gray-900");
+        TailwindFX.apply(title, "text-lg", "font-bold", "text-gray-800");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button viewAll = new Button("View All →");
-        viewAll.getStyleClass().addAll("bg-transparent");
+        Label viewAll = new Label("View all");
+        TailwindFX.apply(viewAll, "text-sm", "text-blue-600");
         viewAll.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(viewAll, "text-sm", "font-medium", "text-blue-600");
 
-        header.getChildren().addAll(title, viewAll);
+        header.getChildren().addAll(title, spacer, viewAll);
 
-        // Activity list
-        VBox activities = new VBox(16);
-
+        VBox activities = new VBox(12);
         activities.getChildren().addAll(
-            createActivityItem("👤", "New user registered", "2 min ago", "bg-green-100", "text-green-600"),
-            createActivityItem("💳", "Payment received", "15 min ago", "bg-blue-100", "text-blue-600"),
-            createActivityItem("📄", "Report generated", "1 hour ago", "bg-purple-100", "text-purple-600"),
-            createActivityItem("🔄", "System update", "3 hours ago", "bg-amber-100", "text-amber-600"),
-            createActivityItem("💾", "Backup completed", "5 hours ago", "bg-gray-100", "text-gray-600")
+            createActivityItem("👤", "New user registered", "2 minutes ago"),
+            createActivityItem("💳", "Payment received - $1,250", "15 minutes ago"),
+            createActivityItem("📄", "Report generated", "1 hour ago"),
+            createActivityItem("⚙️", "System update completed", "3 hours ago"),
+            createActivityItem("💾", "Backup completed successfully", "5 hours ago"),
+            createActivityItem("🔔", "New order #1234", "6 hours ago")
         );
 
         section.getChildren().addAll(header, activities);
         return section;
     }
 
-    private static HBox createActivityItem(String icon, String activity, String time, String bgClass, String textClass) {
-        HBox item = new HBox(14);
-        item.setAlignment(Pos.CENTER_LEFT);
-        item.setPadding(new Insets(8, 0, 8, 0));
-        item.setCursor(javafx.scene.Cursor.HAND);
-
-        // Icon with background
-        StackPane iconBox = new StackPane();
-        iconBox.setPrefSize(40, 40);
-        iconBox.getStyleClass().addAll(bgClass, "rounded-lg");
-        Label iconLabel = new Label(icon);
-        TailwindFX.apply(iconLabel, "text-sm", textClass);
-        iconBox.getChildren().add(iconLabel);
-
-        // Text
-        VBox text = new VBox(2);
-        Label activityLabel = new Label(activity);
-        TailwindFX.apply(activityLabel, "text-sm", "font-medium", "text-gray-900");
-        Label timeLabel = new Label(time);
-        TailwindFX.apply(timeLabel, "text-xs", "text-gray-500");
-        text.getChildren().addAll(activityLabel, timeLabel);
-
-        item.getChildren().addAll(iconBox, text);
-
-        item.setOnMouseEntered(e -> item.getStyleClass().addAll("bg-gray-50", "rounded-lg"));
-        item.setOnMouseExited(e -> item.getStyleClass().removeAll("bg-gray-50", "rounded-lg"));
-
-        return item;
-    }
-
-    // =========================================================================
-    // Quick Chat Panel
-    // =========================================================================
-
-    private static VBox createQuickChat() {
-        VBox section = new VBox(16);
-        section.getStyleClass().addAll("card", "shadow-md");
-        section.setPadding(new Insets(20));
-
-        // Header
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        Label title = new Label("Messages");
-        TailwindFX.apply(title, "text-base", "font-bold", "text-gray-900");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Button newMsg = new Button("+ New");
-        newMsg.getStyleClass().addAll("btn-primary", "btn-sm");
-        newMsg.setCursor(javafx.scene.Cursor.HAND);
-
-        header.getChildren().addAll(title, newMsg);
-
-        // Chat list
-        VBox chats = new VBox(12);
-
-        chats.getChildren().addAll(
-            createChatItem("JD", "John Smith", "Hey, how's the project going?", "2m", true),
-            createChatItem("AS", "Alice Johnson", "Thanks for the update!", "15m", false),
-            createChatItem("BW", "Bob Wilson", "Can we schedule a meeting?", "1h", false),
-            createChatItem("CM", "Carol Martinez", "The design looks great! 🎉", "3h", false)
-        );
-
-        section.getChildren().addAll(header, chats);
-        return section;
-    }
-
-    private static HBox createChatItem(String initials, String name, String lastMessage, String time, boolean unread) {
+    private static HBox createActivityItem(String icon, String message, String time) {
         HBox item = new HBox(12);
         item.setAlignment(Pos.CENTER_LEFT);
-        item.setPadding(new Insets(12));
-        item.getStyleClass().addAll("bg-gray-50", "rounded-xl");
         item.setCursor(javafx.scene.Cursor.HAND);
 
-        // Avatar
-        StackPane avatar = ComponentFactory.avatar(initials, unread ? "blue" : "gray", 44);
-        TailwindFX.apply(avatar, "rounded-full");
+        StackPane iconBox = new StackPane();
+        iconBox.setPrefSize(40, 40);
+        TailwindFX.jit(iconBox, "bg-blue-50", "rounded-lg");
+        Label iconLabel = new Label(icon);
+        TailwindFX.apply(iconLabel, "text-lg");
+        iconBox.getChildren().add(iconLabel);
 
-        // Message preview
-        VBox preview = new VBox(4);
-        preview.setPrefWidth(200);
-
-        HBox nameRow = new HBox(8);
-        nameRow.setAlignment(Pos.CENTER_LEFT);
-        Label nameLabel = new Label(name);
-        TailwindFX.apply(nameLabel, "text-sm", "font-semibold", "text-gray-900");
+        VBox content = new VBox(4);
+        Label msgLabel = new Label(message);
+        TailwindFX.apply(msgLabel, "text-sm", "font-medium", "text-gray-900");
 
         Label timeLabel = new Label(time);
-        TailwindFX.apply(timeLabel, "text-xs", "text-gray-400");
+        TailwindFX.apply(timeLabel, "text-xs", "text-gray-500");
 
-        nameRow.getChildren().addAll(nameLabel, timeLabel);
+        content.getChildren().addAll(msgLabel, timeLabel);
+        item.getChildren().addAll(iconBox, content);
 
-        Label messageLabel = new Label(lastMessage);
-        TailwindFX.apply(messageLabel, "text-sm", "text-gray-500");
-        messageLabel.setWrapText(true);
-
-        preview.getChildren().addAll(nameRow, messageLabel);
-
-        item.getChildren().addAll(avatar, preview);
-
-        // Unread indicator
-        if (unread) {
-            StackPane dot = new StackPane();
-            dot.setPrefSize(10, 10);
-            dot.getStyleClass().addAll("bg-blue-500", "rounded-full");
-            item.getChildren().add(dot);
-        }
-
-        item.setOnMouseEntered(e -> item.setStyle("-fx-background-color: -color-gray-100;"));
-        item.setOnMouseExited(e -> item.setStyle("-fx-background-color: -color-gray-50;"));
+        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50", "rounded-lg", "p-2"));
+        item.setOnMouseExited(e -> TailwindFX.jit(item, "bg-transparent", "p-0"));
 
         return item;
     }
 
     // =========================================================================
-    // Data Table Section
+    // Enhanced Data Table
     // =========================================================================
 
-    private static VBox createDataTableSection() {
-        VBox section = new VBox(0);
-        section.getStyleClass().addAll("card", "shadow-md");
+    private static VBox createEnhancedDataTable() {
+        VBox section = new VBox(20);
+        TailwindFX.jit(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
-        // Header
+        // Header with search and filters
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(20, 24, 20, 24));
 
-        VBox titleBox = new VBox(4);
         Label title = new Label("Recent Orders");
-        TailwindFX.apply(title, "text-lg", "font-bold", "text-gray-900");
-        Label subtitle = new Label("Manage your latest orders");
-        TailwindFX.apply(subtitle, "text-sm", "text-gray-500");
-        titleBox.getChildren().addAll(title, subtitle);
+        TailwindFX.apply(title, "text-lg", "font-bold", "text-gray-800");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox actions = new HBox(12);
-
-        TextField search = new TextField();
-        search.setPromptText("Search orders...");
-        search.setPrefWidth(200);
-        search.getStyleClass().addAll("input", "input-sm");
-        search.setStyle("-fx-background-color: -color-gray-100;");
-
-        Button filterBtn = new Button("⚡ Filter");
-        filterBtn.getStyleClass().addAll("btn-outline", "btn-sm");
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search orders...");
+        TailwindFX.jit(searchField, "input", "w-64");
+        
+        Button filterBtn = new Button("🔍 Filter");
+        TailwindFX.jit(filterBtn, "bg-gray-100", "rounded-lg", "px-4", "py-2");
         filterBtn.setCursor(javafx.scene.Cursor.HAND);
+        filterBtn.setOnAction(e -> 
+            DashboardComponents.showToast("Filter options coming soon!", DashboardComponents.ToastType.INFO));
 
-        actions.getChildren().addAll(search, filterBtn);
+        Button exportBtn = new Button("📥 Export");
+        TailwindFX.jit(exportBtn, "bg-blue-600", "text-white", "rounded-lg", "px-4", "py-2");
+        exportBtn.setCursor(javafx.scene.Cursor.HAND);
+        exportBtn.setOnAction(e -> 
+            DashboardComponents.showToast("Exporting orders...", DashboardComponents.ToastType.SUCCESS));
 
-        header.getChildren().addAll(titleBox, actions);
+        header.getChildren().addAll(title, spacer, searchField, filterBtn, exportBtn);
 
-        // Table
-        VBox tableContainer = createDataTable();
+        // Sample data table using FxDataTable
+        FxDataTable<Order> table = FxDataTable.of(Order.class)
+            .column("Order ID", Order::getOrderId)
+            .column("Customer", Order::getCustomer)
+            .column("Product", Order::getProduct)
+            .column("Amount", Order::getAmount)
+            .column("Status", Order::getStatus)
+            .column("Date", Order::getDate)
+            .searchable(true)
+            .pageSize(10)
+            .style("table-striped", "table-hover")
+            .build();
 
-        section.getChildren().addAll(header, tableContainer);
+        // Sample data
+        java.util.List<Order> orders = java.util.Arrays.asList(
+            new Order("#1234", "Alice Smith", "MacBook Pro", "$2,499", "completed", "2024-01-15"),
+            new Order("#1235", "Bob Johnson", "iPhone 15", "$999", "pending", "2024-01-15"),
+            new Order("#1236", "Carol Williams", "AirPods Pro", "$249", "shipped", "2024-01-14"),
+            new Order("#1237", "David Brown", "iPad Air", "$799", "processing", "2024-01-14"),
+            new Order("#1238", "Eve Davis", "Apple Watch", "$399", "completed", "2024-01-13"),
+            new Order("#1239", "Frank Miller", "Mac Mini", "$699", "pending", "2024-01-13"),
+            new Order("#1240", "Grace Wilson", "Magic Keyboard", "$299", "shipped", "2024-01-12"),
+            new Order("#1241", "Henry Moore", "Studio Display", "$1,599", "completed", "2024-01-12")
+        );
+
+        table.setItems(orders);
+
+        section.getChildren().addAll(header, table.container());
         return section;
     }
 
-    private static VBox createDataTable() {
-        VBox table = new VBox(0);
+    public static class Order {
+        private String orderId, customer, product, amount, status, date;
 
-        // Table header
-        HBox headerRow = new HBox();
-        headerRow.setPadding(new Insets(14, 24, 14, 24));
-        headerRow.getStyleClass().addAll("bg-gray-50");
-
-        String[] headers = {"Order ID", "Customer", "Product", "Amount", "Status", "Action"};
-        int[] widths = {110, 180, 220, 100, 130, 80};
-
-        for (int i = 0; i < headers.length; i++) {
-            Label header = new Label(headers[i]);
-            TailwindFX.apply(header, "text-xs", "font-semibold", "text-gray-500", "uppercase");
-            header.setPrefWidth(widths[i]);
-            headerRow.getChildren().add(header);
-        }
-
-        table.getChildren().add(headerRow);
-
-        // Table rows
-        OrderData[] orders = {
-            new OrderData("#ORD-001", "Alice Johnson", "MacBook Pro 16\"", "$2,499", "completed", "2024-01-15", "AJ", "blue"),
-            new OrderData("#ORD-002", "Bob Smith", "iPhone 15 Pro", "$1,199", "pending", "2024-01-15", "BS", "green"),
-            new OrderData("#ORD-003", "Carol White", "AirPods Max", "$549", "shipped", "2024-01-14", "CW", "purple"),
-            new OrderData("#ORD-004", "David Brown", "iPad Pro 12.9\"", "$1,099", "processing", "2024-01-14", "DB", "amber"),
-            new OrderData("#ORD-005", "Eva Martinez", "Apple Watch Ultra", "$799", "completed", "2024-01-13", "EM", "blue")
-        };
-
-        for (OrderData order : orders) {
-            HBox row = createTableRow(order);
-            table.getChildren().add(row);
-        }
-
-        return table;
-    }
-
-    private static class OrderData {
-        String orderId, customer, product, amount, status, date, initials, color;
-        OrderData(String orderId, String customer, String product, String amount, String status, String date, String initials, String color) {
+        public Order(String orderId, String customer, String product, String amount, String status, String date) {
             this.orderId = orderId;
             this.customer = customer;
             this.product = product;
             this.amount = amount;
             this.status = status;
             this.date = date;
-            this.initials = initials;
-            this.color = color;
-        }
-    }
-
-    private static HBox createTableRow(OrderData data) {
-        HBox row = new HBox();
-        row.setPadding(new Insets(18, 24, 18, 24));
-        row.getStyleClass().addAll("bg-white");
-        row.setCursor(javafx.scene.Cursor.HAND);
-
-        int[] widths = {110, 180, 220, 100, 130, 80};
-
-        // Order ID
-        Label orderId = new Label(data.orderId);
-        TailwindFX.apply(orderId, "text-sm", "font-semibold", "text-gray-900");
-        orderId.setPrefWidth(widths[0]);
-        row.getChildren().add(orderId);
-
-        // Customer with avatar
-        HBox customer = new HBox(10);
-        customer.setAlignment(Pos.CENTER_LEFT);
-        StackPane avatar = ComponentFactory.avatar(data.initials, data.color, 32);
-        TailwindFX.apply(avatar, "rounded-full");
-        Label customerName = new Label(data.customer);
-        TailwindFX.apply(customerName, "text-sm", "text-gray-700");
-        customer.getChildren().addAll(avatar, customerName);
-        customer.setPrefWidth(widths[1]);
-        row.getChildren().add(customer);
-
-        // Product
-        Label product = new Label(data.product);
-        TailwindFX.apply(product, "text-sm", "text-gray-700");
-        product.setPrefWidth(widths[2]);
-        row.getChildren().add(product);
-
-        // Amount
-        Label amount = new Label(data.amount);
-        TailwindFX.apply(amount, "text-sm", "font-semibold", "text-gray-900");
-        amount.setPrefWidth(widths[3]);
-        row.getChildren().add(amount);
-
-        // Status badge
-        StackPane badge = createStatusBadge(data.status);
-        badge.setPrefWidth(widths[4]);
-        row.getChildren().add(badge);
-
-        // Action button
-        Button moreBtn = new Button("⋮");
-        moreBtn.getStyleClass().addAll("bg-transparent");
-        moreBtn.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(moreBtn, "text-lg", "text-gray-400");
-        moreBtn.setPrefWidth(widths[5]);
-        row.getChildren().add(moreBtn);
-
-        row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: -color-gray-50;"));
-        row.setOnMouseExited(e -> row.setStyle("-fx-background-color: -color-white;"));
-
-        return row;
-    }
-
-    private static StackPane createStatusBadge(String status) {
-        StackPane badge = new StackPane();
-        Label label = new Label(status.substring(0, 1).toUpperCase() + status.substring(1));
-
-        switch (status) {
-            case "completed":
-                badge.getStyleClass().addAll("bg-green-100", "rounded-full");
-                TailwindFX.apply(label, "text-xs", "font-bold", "text-green-700");
-                break;
-            case "pending":
-                badge.getStyleClass().addAll("bg-amber-100", "rounded-full");
-                TailwindFX.apply(label, "text-xs", "font-bold", "text-amber-700");
-                break;
-            case "shipped":
-                badge.getStyleClass().addAll("bg-blue-100", "rounded-full");
-                TailwindFX.apply(label, "text-xs", "font-bold", "text-blue-700");
-                break;
-            case "processing":
-                badge.getStyleClass().addAll("bg-purple-100", "rounded-full");
-                TailwindFX.apply(label, "text-xs", "font-bold", "text-purple-700");
-                break;
         }
 
-        badge.setPadding(new Insets(6, 14, 6, 14));
-        badge.getChildren().add(label);
-        return badge;
+        public String getOrderId() { return orderId; }
+        public String getCustomer() { return customer; }
+        public String getProduct() { return product; }
+        public String getAmount() { return amount; }
+        public String getStatus() { return status; }
+        public String getDate() { return date; }
     }
 
     // =========================================================================
-    // Products Section
+    // Demo Controls
     // =========================================================================
 
-    private static VBox createProductsSection() {
+    private static VBox createDemoControls() {
         VBox section = new VBox(20);
+        TailwindFX.jit(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
-        // Section header
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
+        Label title = new Label("UI Components Showcase");
+        TailwindFX.apply(title, "text-xl", "font-bold", "text-gray-900");
 
-        VBox titleBox = new VBox(4);
-        Label title = new Label("Featured Products");
-        TailwindFX.apply(title, "text-lg", "font-bold", "text-gray-900");
-        Label subtitle = new Label("Handpicked selection of top products");
-        TailwindFX.apply(subtitle, "text-sm", "text-gray-500");
-        titleBox.getChildren().addAll(title, subtitle);
+        // Buttons row
+        HBox buttonsRow = new HBox(12);
+        buttonsRow.setAlignment(Pos.CENTER_LEFT);
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox actions = new HBox(12);
-        Button prev = new Button("←");
-        prev.getStyleClass().addAll("btn-outline", "rounded-lg");
-        prev.setPrefSize(40, 40);
-        prev.setCursor(javafx.scene.Cursor.HAND);
-
-        Button next = new Button("→");
-        next.getStyleClass().addAll("btn-outline", "rounded-lg");
-        next.setPrefSize(40, 40);
-        next.setCursor(javafx.scene.Cursor.HAND);
-
-        actions.getChildren().addAll(prev, next);
-
-        header.getChildren().addAll(titleBox, spacer, actions);
-        section.getChildren().add(header);
-
-        // Products grid
-        HBox productsGrid = new HBox(20);
-        productsGrid.getChildren().addAll(
-            createProductCard("MacBook Pro 16\"", "Apple M3 Max, 36GB RAM, 1TB SSD", "$3,499", "blue", "⭐⭐⭐⭐⭐", "(48 reviews)", true),
-            createProductCard("iPhone 15 Pro", "Titanium, 256GB, Natural", "$1,199", "gray", "⭐⭐⭐⭐⭐", "(124 reviews)", true),
-            createProductCard("AirPods Pro", "2nd Gen with USB-C Charging", "$249", "green", "⭐⭐⭐⭐☆", "(89 reviews)", false),
-            createProductCard("iPad Pro 12.9\"", "M2 Chip, 512GB, Wi-Fi", "$1,099", "purple", "⭐⭐⭐⭐⭐", "(67 reviews)", true)
-        );
-
-        section.getChildren().add(productsGrid);
-        return section;
-    }
-
-    private static VBox createProductCard(String title, String description, String price, String color, String rating, String reviews, boolean inStock) {
-        VBox card = new VBox(0);
-        card.getStyleClass().addAll("card", "shadow-md");
-        card.setCursor(javafx.scene.Cursor.HAND);
-
-        // Image area
-        StackPane imageContainer = new StackPane();
-        imageContainer.setPrefHeight(180);
-        imageContainer.getStyleClass().addAll("bg-gray-100", "rounded-t-xl");
-
-        Label productIcon = new Label("📦");
-        TailwindFX.apply(productIcon, "text-5xl");
-        imageContainer.getChildren().add(productIcon);
-
-        // Wishlist button
-        Button wishlist = new Button("♡");
-        wishlist.getStyleClass().addAll("bg-white", "rounded-full", "shadow-sm");
-        wishlist.setPrefSize(36, 36);
-        wishlist.setCursor(javafx.scene.Cursor.HAND);
-        StackPane.setAlignment(wishlist, Pos.TOP_RIGHT);
-        ((StackPane) imageContainer).getChildren().add(wishlist);
-
-        card.getChildren().add(imageContainer);
-
-        // Content
-        VBox content = new VBox(12);
-        content.setPadding(new Insets(20));
-
-        Label titleLabel = new Label(title);
-        TailwindFX.apply(titleLabel, "text-base", "font-bold", "text-gray-900");
-
-        Label descLabel = new Label(description);
-        descLabel.setWrapText(true);
-        TailwindFX.apply(descLabel, "text-sm", "text-gray-500");
-
-        // Rating
-        HBox ratingRow = new HBox(6);
-        ratingRow.setAlignment(Pos.CENTER_LEFT);
-        Label ratingLabel = new Label(rating);
-        TailwindFX.apply(ratingLabel, "text-sm", "text-amber-500");
-        Label reviewsLabel = new Label(reviews);
-        TailwindFX.apply(reviewsLabel, "text-xs", "text-gray-400");
-        ratingRow.getChildren().addAll(ratingLabel, reviewsLabel);
-
-        // Price and cart
-        HBox priceRow = new HBox(12);
-        priceRow.setAlignment(Pos.CENTER);
-
-        Label priceLabel = new Label(price);
-        TailwindFX.apply(priceLabel, "text-xl", "font-bold", "text-gray-900");
-
-        Button addToCart = new Button("Add to Cart");
-        addToCart.getStyleClass().addAll("btn-primary", "btn-sm");
-        addToCart.setCursor(javafx.scene.Cursor.HAND);
-
-        priceRow.getChildren().addAll(priceLabel, addToCart);
-
-        content.getChildren().addAll(titleLabel, descLabel, ratingRow, priceRow);
-        card.getChildren().add(content);
-
-        card.setOnMouseEntered(e -> card.getStyleClass().addAll("shadow-lg"));
-        card.setOnMouseExited(e -> card.getStyleClass().removeAll("shadow-lg"));
-
-        return card;
-    }
-
-    // =========================================================================
-    // Demo Controls (for reference)
-    // =========================================================================
-
-    public static VBox createDemoControls() {
-        VBox controls = new VBox(16);
-        controls.getStyleClass().add("card");
-        controls.setPadding(new Insets(20));
-
-        Label title = new Label("UI Components Demo");
-        TailwindFX.apply(title, "text-lg", "font-semibold", "text-gray-900");
-
-        // Buttons
-        HBox buttons = new HBox(8);
-        buttons.setAlignment(Pos.CENTER_LEFT);
-
-        Button primary = new Button("Primary");
-        TailwindFX.apply(primary, "btn", "btn-primary");
+        Button primary = new Button("Primary Button");
+        TailwindFX.jit(primary, "bg-blue-600", "text-white", "rounded-lg", "px-4", "py-2");
+        primary.setCursor(javafx.scene.Cursor.HAND);
+        primary.setOnAction(e -> 
+            DashboardComponents.showToast("Primary button clicked!", DashboardComponents.ToastType.SUCCESS));
 
         Button secondary = new Button("Secondary");
-        TailwindFX.apply(secondary, "btn", "btn-secondary");
+        TailwindFX.jit(secondary, "bg-gray-200", "text-gray-800", "rounded-lg", "px-4", "py-2");
+        secondary.setCursor(javafx.scene.Cursor.HAND);
 
-        Button success = new Button("Success");
-        TailwindFX.apply(success, "btn", "btn-success");
+        Button success = new Button("✓ Success");
+        TailwindFX.jit(success, "bg-green-600", "text-white", "rounded-lg", "px-4", "py-2");
+        success.setCursor(javafx.scene.Cursor.HAND);
+        success.setOnAction(e -> 
+            DashboardComponents.showToast("Operation successful!", DashboardComponents.ToastType.SUCCESS));
 
-        Button danger = new Button("Danger");
-        TailwindFX.apply(danger, "btn", "btn-danger");
+        Button danger = new Button("✕ Delete");
+        TailwindFX.jit(danger, "bg-red-600", "text-white", "rounded-lg", "px-4", "py-2");
+        danger.setCursor(javafx.scene.Cursor.HAND);
+        danger.setOnAction(e -> 
+            DashboardComponents.showToast("Item deleted", DashboardComponents.ToastType.ERROR));
 
-        Button warning = new Button("Warning");
-        TailwindFX.apply(warning, "btn", "btn-warning");
+        Button warning = new Button("⚠ Warning");
+        TailwindFX.jit(warning, "bg-yellow-500", "text-white", "rounded-lg", "px-4", "py-2");
+        warning.setCursor(javafx.scene.Cursor.HAND);
+        warning.setOnAction(e -> 
+            DashboardComponents.showToast("This is a warning!", DashboardComponents.ToastType.WARNING));
 
-        Button outline = new Button("Outline");
-        TailwindFX.apply(outline, "btn", "btn-outline");
+        buttonsRow.getChildren().addAll(primary, secondary, success, danger, warning);
 
-        buttons.getChildren().addAll(primary, secondary, success, danger, warning, outline);
+        // Badges row
+        HBox badgesRow = new HBox(12);
+        badgesRow.setAlignment(Pos.CENTER_LEFT);
 
-        // Badges
-        HBox badges = new HBox(8);
-        badges.setAlignment(Pos.CENTER_LEFT);
+        Label badge1 = new Label("New");
+        TailwindFX.jit(badge1, "bg-blue-100", "text-blue-800", "px-3", "py-1", "rounded-full", "text-sm");
 
-        badges.getChildren().addAll(
-            createBadge("Default", "gray"),
-            createBadge("Blue", "blue"),
-            createBadge("Green", "green"),
-            createBadge("Red", "red"),
-            createBadge("Yellow", "yellow"),
-            createBadge("Purple", "purple")
-        );
+        Label badge2 = new Label("Active");
+        TailwindFX.jit(badge2, "bg-green-100", "text-green-800", "px-3", "py-1", "rounded-full", "text-sm");
 
-        // Form elements
-        VBox form = new VBox(8);
+        Label badge3 = new Label("Pending");
+        TailwindFX.jit(badge3, "bg-yellow-100", "text-yellow-800", "px-3", "py-1", "rounded-full", "text-sm");
 
-        TextField input = new TextField();
-        input.setPromptText("Enter your email...");
-        TailwindFX.apply(input, "input");
+        Label badge4 = new Label("Error");
+        TailwindFX.jit(badge4, "bg-red-100", "text-red-800", "px-3", "py-1", "rounded-full", "text-sm");
 
-        ChoiceBox<String> choice = new ChoiceBox<>();
-        choice.getItems().addAll("Option 1", "Option 2", "Option 3");
-        choice.setValue("Option 1");
-        TailwindFX.apply(choice, "input");
+        badgesRow.getChildren().addAll(new Label("Badges: "), badge1, badge2, badge3, badge4);
 
-        CheckBox checkbox = new CheckBox("I agree to the terms");
-        TailwindFX.apply(checkbox, "text-sm");
-
-        form.getChildren().addAll(input, choice, checkbox);
-
-        controls.getChildren().addAll(title, buttons, badges, form);
-        return controls;
-    }
-
-    private static Label createBadge(String text, String color) {
-        Label badge = new Label(text);
-        TailwindFX.apply(badge, "badge", "badge-" + color);
-        return badge;
+        section.getChildren().addAll(title, buttonsRow, badgesRow);
+        return section;
     }
 }

@@ -132,6 +132,17 @@ public final class TailwindFX {
         installComponentsPreset(scene);
         installDark(scene);
     }
+    
+    public static void installAll(Scene scene, Stage stage){
+        installBase(scene);
+        installComponents(scene);
+        installUtilities(scene);
+        installColors(scene);
+        installEffects(scene);
+        installComponentsPreset(scene);
+        installDark(scene);
+        responsive(stage);
+    }
 
     private static void installCss(Scene scene, String css_path){
         String url = Objects.requireNonNull(
@@ -201,6 +212,8 @@ public final class TailwindFX {
     /**
      * Aplica utility classes SIN resolver conflictos.
      * Usar cuando quieres acumular clases deliberadamente.
+     * @param node
+     * @param classes
      */
     public static void applyRaw(Node node, String... classes) {
         for (String c : classes) {

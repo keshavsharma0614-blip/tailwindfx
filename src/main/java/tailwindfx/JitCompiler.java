@@ -149,40 +149,170 @@ public final class JitCompiler {
         StringBuilder inlineStyle = new StringBuilder();
         List<String> cssClasses = new ArrayList<>();
 
+        // Gradient state tracking
+        String gradientDirection = null;
+        String fromColor = null;
+        String viaColor = null;
+        String toColor = null;
+        boolean hasGradient = false;
+
+        // First pass: collect gradient-related tokens
+        List<String> nonGradientTokens = new ArrayList<>();
         for (String token : tokens) {
             if (token == null || token.isBlank()) {
                 continue;
             }
-            // Soporte para strings con espacios: "p-4 bg-blue-500" como un solo arg
             for (String t : token.split("\\s+")) {
                 if (t == null || t.isBlank()) {
                     continue;
                 }
-                CompileResult result = compile(t);
-                if (result.hasInlineStyle()) {
-                    inlineStyle.append(result.inlineStyle()).append(" ");
+
+                // Check for gradient direction
+                if (t.startsWith("bg-gradient-to-")) {
+                    hasGradient = true;
+                    String dir = t.substring("bg-gradient-to-".length());
+                    gradientDirection = switch (dir) {
+                        case "t" -> "to top";
+                        case "tr" -> "to top right";
+                        case "r" -> "to right";
+                        case "br" -> "to bottom right";
+                        case "b" -> "to bottom";
+                        case "bl" -> "to bottom left";
+                        case "l" -> "to left";
+                        case "tl" -> "to top left";
+                        default -> "to bottom";
+                    };
                 }
-                if (result.hasCssClass()) {
-                    cssClasses.add(result.cssClass());
-                }
-                if (!result.isKnown()) {
-                    // Heurística: si parece un token JIT (tiene dígitos, /, [) → warn
-                    // Si parece una CSS class intencional (btn-primary) → silencioso
-                    if (LOOKS_LIKE_JIT.matcher(t).matches()) {
-                        LOG.warning("TailwindFX JIT: token desconocido '" + t
-                                + "' (parece utility JIT pero no se reconoció)");
-                    } else if (DEBUG) {
-                        LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback al stylesheet)");
+                // Check for from-* color (e.g., "from-blue-500", "from-gray-800")
+                else if (t.startsWith("from-")) {
+                    String colorResolved = resolveGradientColor(t.substring(5));
+                    if (colorResolved != null) {
+                        hasGradient = true;
+                        fromColor = colorResolved;
+                    } else {
+                        nonGradientTokens.add(t);
                     }
-                } else if (DEBUG) {
-                    String what = result.hasInlineStyle() ? "inline: " + result.inlineStyle().trim()
-                            : "class: " + result.cssClass();
-                    LOG.info("TailwindFX JIT: '" + t + "' → " + what);
+                }
+                // Check for via-* color
+                else if (t.startsWith("via-")) {
+                    String colorResolved = resolveGradientColor(t.substring(4));
+                    if (colorResolved != null) {
+                        hasGradient = true;
+                        viaColor = colorResolved;
+                    } else {
+                        nonGradientTokens.add(t);
+                    }
+                }
+                // Check for to-* color
+                else if (t.startsWith("to-")) {
+                    String colorResolved = resolveGradientColor(t.substring(3));
+                    if (colorResolved != null) {
+                        hasGradient = true;
+                        toColor = colorResolved;
+                    } else {
+                        nonGradientTokens.add(t);
+                    }
+                }
+                // Non-gradient token
+                else {
+                    nonGradientTokens.add(t);
                 }
             }
         }
 
+        // If we have gradient components, build the gradient
+        if (hasGradient) {
+            String gradient = buildGradient(gradientDirection, fromColor, viaColor, toColor);
+            if (gradient != null) {
+                inlineStyle.append(gradient).append(" ");
+            }
+        }
+
+        // Process non-gradient tokens normally
+        for (String t : nonGradientTokens) {
+            CompileResult result = compile(t);
+            if (result.hasInlineStyle()) {
+                inlineStyle.append(result.inlineStyle()).append(" ");
+            }
+            if (result.hasCssClass()) {
+                cssClasses.add(result.cssClass());
+            }
+            if (!result.isKnown()) {
+                // Heurística: si parece un token JIT (tiene dígitos, /, [) → warn
+                // Si parece una CSS class intencional (btn-primary) → silencioso
+                // Excepciones: tokens de gradientes no reconocidos → silenciosos
+                boolean isGradientRelated = t.startsWith("from-") || t.startsWith("via-") 
+                        || t.startsWith("to-") || t.startsWith("bg-gradient-");
+                if (LOOKS_LIKE_JIT.matcher(t).matches() && !isGradientRelated) {
+                    LOG.warning("TailwindFX JIT: token desconocido '" + t
+                            + "' (parece utility JIT pero no se reconoció)");
+                } else if (DEBUG) {
+                    LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback al stylesheet)");
+                }
+            } else if (DEBUG) {
+                String what = result.hasInlineStyle() ? "inline: " + result.inlineStyle().trim()
+                        : "class: " + result.cssClass();
+                LOG.info("TailwindFX JIT: '" + t + "' → " + what);
+            }
+        }
+
         return new BatchResult(inlineStyle.toString().trim(), cssClasses);
+    }
+
+    /**
+     * Resuelve un token de color para gradientes (e.g., "blue-500", "gray-800")
+     */
+    private static String resolveGradientColor(String colorToken) {
+        if (colorToken == null || colorToken.isBlank()) {
+            return null;
+        }
+
+        // Parse color-shade pattern like "blue-500", "gray-800"
+        int lastDash = colorToken.lastIndexOf('-');
+        if (lastDash == -1) {
+            // Single color name, try shade 500
+            String hex = ColorPalette.hex(colorToken, 500);
+            return hex != null ? hex : null;
+        }
+
+        String colorName = colorToken.substring(0, lastDash);
+        String shadeStr = colorToken.substring(lastDash + 1);
+
+        try {
+            int shade = Integer.parseInt(shadeStr);
+            String hex = ColorPalette.hex(colorName, shade);
+            return hex != null ? hex : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Construye un gradiente linear a partir de sus componentes
+     */
+    private static String buildGradient(String direction, String from, String via, String to) {
+        if (direction == null && from == null && to == null) {
+            return null;
+        }
+
+        String dir = direction != null ? direction : "to bottom";
+        String fromColor = from != null ? from : "#6B7280"; // gray-500 default
+        String toColor = to != null ? to : "#9CA3AF"; // gray-400 default
+
+        StringBuilder gradient = new StringBuilder("linear-gradient(");
+        gradient.append(dir);
+
+        if (via != null) {
+            gradient.append(", ").append(fromColor)
+                    .append(", ").append(via)
+                    .append(", ").append(toColor);
+        } else {
+            gradient.append(", ").append(fromColor)
+                    .append(", ").append(toColor);
+        }
+
+        gradient.append(")");
+        return prop("-fx-background-color", gradient.toString());
     }
 
     public record BatchResult(String inlineStyle, List<String> cssClasses) {
@@ -322,7 +452,7 @@ public final class JitCompiler {
                 + prop("-fx-border-radius", "%.0fpx".formatted(r));
             }
             case "border" ->
-                prop("-fx-border-width", "%.0fpx".formatted(n));
+                prop("-fx-border-width", "%dpx".formatted(n));
             case "shadow" ->
                 buildShadow(n);
             default ->
@@ -510,6 +640,10 @@ public final class JitCompiler {
                 parseAspectRatioArbitrary(val);
             case "bg-gradient" ->
                 parseGradient(val);
+            case "ring" ->
+                prop("-fx-border-width", "3px") + prop("-fx-border-color", val);
+            case "ring-offset" ->
+                prop("-fx-border-width", "3px");
             default ->
                 null;
         };
@@ -689,6 +823,110 @@ public final class JitCompiler {
                 prop("-fx-opacity", "1.0");
             case "invisible" ->
                 prop("-fx-opacity", "0");
+
+            // Overflow (JavaFX no tiene CSS equivalente — usar Java API)
+            case "overflow-auto" ->
+                prop("/* overflow-auto: handled by ScrollPane */", "");
+            case "overflow-hidden" ->
+                prop("-fx-clip", "null"); // JavaFX clip se maneja en Java
+            case "overflow-scroll" ->
+                prop("/* overflow-scroll: handled by ScrollPane */", "");
+            case "overflow-x-auto" ->
+                prop("/* handled by ScrollPane */", "");
+            case "overflow-y-auto" ->
+                prop("/* handled by ScrollPane */", "");
+
+            // Display
+            case "block" ->
+                prop("/* display: block — default en JavaFX */", "");
+            case "inline" ->
+                prop("/* display: inline — usar Label en vez de Region */", "");
+            case "inline-block" ->
+                prop("/* display: inline-block — default en JavaFX */", "");
+            case "hidden" ->
+                prop("-fx-visible", "false");
+            case "contents" ->
+                prop("/* display: contents — no aplica en JavaFX */", "");
+
+            // Position (JavaFX usa layout panes en vez de position CSS)
+            case "static" ->
+                prop("/* position: static — default en JavaFX */", "");
+            case "fixed" ->
+                prop("/* position: fixed — usar Stage o Popup */", "");
+            case "absolute" ->
+                prop("/* position: absolute — usar Pane con layoutX/Y */", "");
+            case "relative" ->
+                prop("/* position: relative — usar StackPane o AnchorPane */", "");
+            case "sticky" ->
+                prop("/* position: sticky — implementar en Java */", "");
+
+            // Backdrop filters
+            case "backdrop-blur-none" ->
+                prop("/* backdrop-blur: none — usar Java Effects */", "");
+            case "backdrop-blur-sm" ->
+                prop("/* backdrop-blur: sm — usar BoxBlur en Java */", "");
+            case "backdrop-blur" ->
+                prop("/* backdrop-blur: md — usar BoxBlur en Java */", "");
+            case "backdrop-blur-md" ->
+                prop("/* backdrop-blur: md — usar BoxBlur en Java */", "");
+            case "backdrop-blur-lg" ->
+                prop("/* backdrop-blur: lg — usar BoxBlur en Java */", "");
+            case "backdrop-blur-xl" ->
+                prop("/* backdrop-blur: xl — usar BoxBlur en Java */", "");
+            case "backdrop-blur-2xl" ->
+                prop("/* backdrop-blur: 2xl — usar BoxBlur en Java */", "");
+            case "backdrop-blur-3xl" ->
+                prop("/* backdrop-blur: 3xl — usar BoxBlur en Java */", "");
+
+            // Ring utilities
+            case "ring-0" ->
+                prop("-fx-border-width", "0px");
+            case "ring-1" ->
+                prop("-fx-border-width", "1px") + prop("-fx-border-color", "#D1D5DB");
+            case "ring-2" ->
+                prop("-fx-border-width", "2px") + prop("-fx-border-color", "#D1D5DB");
+            case "ring" ->
+                prop("-fx-border-width", "3px") + prop("-fx-border-color", "#D1D5DB");
+            case "ring-4" ->
+                prop("-fx-border-width", "4px") + prop("-fx-border-color", "#D1D5DB");
+            case "ring-8" ->
+                prop("-fx-border-width", "8px") + prop("-fx-border-color", "#D1D5DB");
+
+            // Border style
+            case "border-solid" ->
+                prop("-fx-border-style", "solid");
+            case "border-dashed" ->
+                prop("-fx-border-style", "dashed");
+            case "border-dotted" ->
+                prop("-fx-border-style", "dotted");
+            case "border-none" ->
+                prop("-fx-border-width", "0px");
+            case "border-0" ->
+                prop("-fx-border-width", "0px");
+            case "border" ->
+                prop("-fx-border-width", "1px") + prop("-fx-border-color", "#E5E7EB");
+            case "border-2" ->
+                prop("-fx-border-width", "2px");
+            case "border-4" ->
+                prop("-fx-border-width", "4px");
+            case "border-8" ->
+                prop("-fx-border-width", "8px");
+
+            // Transitions (JavaFX usa Animation API en Java)
+            case "transition-none" ->
+                prop("/* transition: none — usar JavaFX Animation */", "");
+            case "transition-all" ->
+                prop("/* transition: all — usar Timeline en Java */", "");
+            case "transition" ->
+                prop("/* transition: default — usar JavaFX Animation */", "");
+            case "transition-colors" ->
+                prop("/* transition: colors — usar Timeline en Java */", "");
+            case "transition-opacity" ->
+                prop("/* transition: opacity — usar FadeTransition en Java */", "");
+            case "transition-shadow" ->
+                prop("/* transition: shadow — usar Timeline en Java */", "");
+            case "transition-transform" ->
+                prop("/* transition: transform — usar TranslateTransition en Java */", "");
 
             // Blend mode
             case "blend-multiply" ->

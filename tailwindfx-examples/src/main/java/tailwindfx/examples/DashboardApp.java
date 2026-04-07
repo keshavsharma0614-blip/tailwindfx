@@ -22,36 +22,22 @@ public class DashboardApp extends Application {
         BorderPane dashboard = Dashboard.create();
 
         // Scene with TailwindFX
-        Scene scene = new Scene(dashboard, 1400, 900);
-        TailwindFX.install(scene);
+        Scene scene = new Scene(dashboard, 1500, 1000);
+        TailwindFX.installAll(scene, primaryStage);
 
         // Configure stage
-        primaryStage.setTitle("TailwindFX — Complete Dashboard");
+        primaryStage.setTitle("TailwindFX — Advanced Dashboard");
+        primaryStage.setMinWidth(1200);
+        primaryStage.setMinHeight(800);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Show features info
-        System.out.println("╔════════════════════════════════════════╗");
-        System.out.println("║     TailwindFX Dashboard Demo          ║");
-        System.out.println("╚════════════════════════════════════════╝");
-        System.out.println();
-        System.out.println("Features demonstrated:");
-        System.out.println("  ✓ Navigation sidebar with menu");
-        System.out.println("  ✓ Top bar with search & notifications");
-        System.out.println("  ✓ Theme toggle (dark/light mode)");
-        System.out.println("  ✓ Stats cards with trends");
-        System.out.println("  ✓ Chart section placeholder");
-        System.out.println("  ✓ Recent activity feed");
-        System.out.println("  ✓ Data table with status badges");
-        System.out.println("  ✓ Product cards grid");
-        System.out.println("  ✓ Layout builders (HBox, VBox, GridPane)");
-        System.out.println("  ✓ Color utilities (bg-*, text-*)");
-        System.out.println("  ✓ Spacing utilities (p-*, m-*, gap-*)");
-        System.out.println("  ✓ Shadows and effects");
-        System.out.println("  ✓ Components (cards, badges, buttons, avatars)");
-        System.out.println();
-        System.out.println("Click the ☀️/🌙 button to toggle dark mode!");
-        System.out.println();
+        // Show welcome toast
+        javafx.application.Platform.runLater(() -> {
+            DashboardComponents.showToast(
+                "Welcome to the Dashboard! 🎉",
+                DashboardComponents.ToastType.SUCCESS);
+        });
     }
 
     public static void main(String[] args) {

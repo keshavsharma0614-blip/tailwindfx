@@ -340,6 +340,7 @@ public final class AnimationUtil {
 
     /**
      * Sube el nodo ligeramente al hacer hover (efecto "lift").
+     * @param node
      */
     public static void onHoverLift(Node node) { onHoverLift(node, -4); }
     public static void onHoverLift(Node node, double offsetY) {
