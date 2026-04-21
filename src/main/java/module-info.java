@@ -6,8 +6,8 @@
  */
 module tailwindfx {
     requires javafx.base;
-    requires javafx.controls;
-    requires javafx.graphics;
+    requires transitive javafx.controls;
+    requires transitive javafx.graphics;
     requires java.logging;
     requires java.prefs;
 
