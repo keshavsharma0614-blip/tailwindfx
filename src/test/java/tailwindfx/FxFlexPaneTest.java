@@ -2,7 +2,6 @@ package tailwindfx;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 
 import java.util.List;
