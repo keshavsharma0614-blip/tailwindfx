@@ -99,6 +99,19 @@ public class FxFlexPane extends Pane {
         START, CENTER, END, STRETCH
     }
 
+    /**
+     * Multi-line alignment (analogous to {@code align-content}). Controls how
+     * multiple lines are distributed in the cross-axis when there's extra space.
+     * Only applies when wrap=true and there are multiple lines.
+     */
+    public enum AlignContent {
+        START, CENTER, END,
+        BETWEEN,  // equal space between lines
+        AROUND,   // equal space around lines
+        EVENLY,   // equal space between AND before first/after last line
+        STRETCH   // lines stretch to fill available space
+    }
+
     // =========================================================================
     // Properties
     // =========================================================================
@@ -106,6 +119,7 @@ public class FxFlexPane extends Pane {
     private boolean wrap = false;
     private Justify justify = Justify.START;
     private Align align = Align.START;
+    private AlignContent alignContent = AlignContent.START;
     private double gapMain = 0; // gap along main axis
     private double gapCross = 0; // gap along cross axis
     private Insets padding = Insets.EMPTY;
@@ -179,6 +193,15 @@ public class FxFlexPane extends Pane {
      */
     public FxFlexPane align(Align a) {
         setAlign(a);
+        return this;
+    }
+
+    /**
+     * Sets align-content (multi-line alignment). Triggers layout.
+     * Only applies when wrap=true and there are multiple lines.
+     */
+    public FxFlexPane alignContent(AlignContent ac) {
+        setAlignContent(ac);
         return this;
     }
 
@@ -297,6 +320,12 @@ public class FxFlexPane extends Pane {
         requestLayout();
     }
 
+    public void setAlignContent(AlignContent ac) {
+        Preconditions.requireNonNull(ac, "FxFlexPane.setAlignContent", "alignContent");
+        alignContent = ac;
+        requestLayout();
+    }
+
     public Direction getDirection() {
         return direction;
     }
@@ -311,6 +340,10 @@ public class FxFlexPane extends Pane {
 
     public Align getAlign() {
         return align;
+    }
+
+    public AlignContent getAlignContent() {
+        return alignContent;
     }
 
     public double getGap() {
@@ -664,10 +697,26 @@ public class FxFlexPane extends Pane {
             rows.add(currentRow);
         }
 
+        // Calculate row heights
+        double[] rowHeights = new double[rows.size()];
+        double totalRowsHeight = 0;
+        for (int r = 0; r < rows.size(); r++) {
+            java.util.List<Node> row = rows.get(r);
+            rowHeights[r] = row.stream().mapToDouble(n -> prefH(n)).max().orElse(0);
+            totalRowsHeight += rowHeights[r];
+        }
+
+        // CRITICAL FIX: Apply align-content to distribute extra vertical space between rows
+        double totalGapsHeight = gapCross * (rows.size() - 1);
+        double freeSpace = h - totalRowsHeight - totalGapsHeight;
+        double[] rowYPositions = alignContentPositions(rowHeights, gapCross, h, alignContent);
+
         // Lay out each row
-        double curY = oy;
-        for (java.util.List<Node> row : rows) {
-            double rowH = row.stream().mapToDouble(n -> prefH(n)).max().orElse(0);
+        for (int r = 0; r < rows.size(); r++) {
+            java.util.List<Node> row = rows.get(r);
+            double rowH = rowHeights[r];
+            double curY = oy + rowYPositions[r];
+            
             double[] widths = row.stream().mapToDouble(this::prefW).toArray();
             double[] xs = justifyPositions(widths, gapMain, w, justify);
             for (int i = 0; i < row.size(); i++) {
@@ -676,7 +725,6 @@ public class FxFlexPane extends Pane {
                 double cy = alignedY(c, rowH, ch, align, curY);
                 c.resizeRelocate(ox + xs[i], cy, widths[i], ch);
             }
-            curY += rowH + gapCross;
         }
     }
 
@@ -774,6 +822,89 @@ public class FxFlexPane extends Pane {
                 for (int i = 0; i < sizes.length; i++) {
                     pos[i] = x;
                     x += sizes[i] + unit;
+                }
+            }
+        }
+        return pos;
+    }
+
+    /**
+     * Computes starting Y positions for rows/lines when wrap=true based on align-content.
+     * Similar to justifyPositions but for the cross-axis distribution of multiple lines.
+     *
+     * @param rowHeights heights of each row/line
+     * @param gap gap between rows (gapCross)
+     * @param total total available height
+     * @param ac align-content value
+     * @return array of starting Y positions (same length as rowHeights)
+     */
+    static double[] alignContentPositions(double[] rowHeights, double gap, double total, AlignContent ac) {
+        double usedSpace = 0;
+        for (double h : rowHeights) {
+            usedSpace += h;
+        }
+        double gapTotal = gap * (rowHeights.length - 1);
+        double free = total - usedSpace - gapTotal;
+        double[] pos = new double[rowHeights.length];
+
+        switch (ac) {
+            case START -> {
+                double y = 0;
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + gap;
+                }
+            }
+            case CENTER -> {
+                double y = Math.max(0, free / 2);
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + gap;
+                }
+            }
+            case END -> {
+                double y = Math.max(0, free);
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + gap;
+                }
+            }
+            case BETWEEN -> {
+                if (rowHeights.length == 1) {
+                    pos[0] = 0;
+                    break;
+                }
+                double spaceBetween = rowHeights.length > 1
+                        ? Math.max(gap, (total - usedSpace) / (rowHeights.length - 1)) : gap;
+                double y = 0;
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + spaceBetween;
+                }
+            }
+            case AROUND -> {
+                double unit = free / rowHeights.length;
+                double y = unit / 2;
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + unit;
+                }
+            }
+            case EVENLY -> {
+                double unit = free / (rowHeights.length + 1);
+                double y = unit;
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + unit;
+                }
+            }
+            case STRETCH -> {
+                // Distribute extra space equally to each row
+                double extraPerRow = rowHeights.length > 0 ? free / rowHeights.length : 0;
+                double y = 0;
+                for (int i = 0; i < rowHeights.length; i++) {
+                    pos[i] = y;
+                    y += rowHeights[i] + extraPerRow + gap;
                 }
             }
         }
