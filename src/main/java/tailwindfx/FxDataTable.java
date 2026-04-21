@@ -1,5 +1,6 @@
 package tailwindfx;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,6 +17,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -346,17 +348,23 @@ public final class FxDataTable<T> {
             searchBar.setStyle("-fx-padding: 0 0 8 0;");
             nodes.add(searchBar);
 
-            // Wire search to filter
+            // Wire search to filter with debounce (250ms)
+            // CRITICAL FIX: Prevents UI blocking on large datasets (10,000+ rows)
+            // The filter recalculation now happens only after user stops typing
+            PauseTransition debounce = new PauseTransition(Duration.millis(250));
             searchField.textProperty().addListener((obs, ov, nv) -> {
-                String lower = nv == null ? "" : nv.toLowerCase();
-                filtered.setPredicate(item -> {
-                    if (lower.isBlank()) return true;
-                    // Search across all column values
-                    return b.cols.stream()
-                        .map(col -> col.value().apply(item))
-                        .anyMatch(val -> val != null && val.toLowerCase().contains(lower));
+                debounce.setOnFinished(e -> {
+                    String lower = nv == null ? "" : nv.toLowerCase();
+                    filtered.setPredicate(item -> {
+                        if (lower.isBlank()) return true;
+                        // Search across all column values
+                        return b.cols.stream()
+                            .map(col -> col.value().apply(item))
+                            .anyMatch(val -> val != null && val.toLowerCase().contains(lower));
+                    });
+                    if (paginated) { currentPage = 0; applyPage(); }
                 });
-                if (paginated) { currentPage = 0; applyPage(); }
+                debounce.playFromStart();
             });
         }
 
