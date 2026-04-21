@@ -201,6 +201,71 @@
     -fx-text-fill: -color-purple-700;
 }
 
+.badge-slate {
+    -fx-background-color: -color-slate-100;
+    -fx-text-fill: -color-slate-700;
+}
+
+.badge-orange {
+    -fx-background-color: -color-orange-100;
+    -fx-text-fill: -color-orange-700;
+}
+
+.badge-amber {
+    -fx-background-color: -color-amber-100;
+    -fx-text-fill: -color-amber-700;
+}
+
+.badge-lime {
+    -fx-background-color: -color-lime-100;
+    -fx-text-fill: -color-lime-700;
+}
+
+.badge-emerald {
+    -fx-background-color: -color-emerald-100;
+    -fx-text-fill: -color-emerald-700;
+}
+
+.badge-teal {
+    -fx-background-color: -color-teal-100;
+    -fx-text-fill: -color-teal-700;
+}
+
+.badge-cyan {
+    -fx-background-color: -color-cyan-100;
+    -fx-text-fill: -color-cyan-700;
+}
+
+.badge-sky {
+    -fx-background-color: -color-sky-100;
+    -fx-text-fill: -color-sky-700;
+}
+
+.badge-indigo {
+    -fx-background-color: -color-indigo-100;
+    -fx-text-fill: -color-indigo-700;
+}
+
+.badge-violet {
+    -fx-background-color: -color-violet-100;
+    -fx-text-fill: -color-violet-700;
+}
+
+.badge-fuchsia {
+    -fx-background-color: -color-fuchsia-100;
+    -fx-text-fill: -color-fuchsia-700;
+}
+
+.badge-pink {
+    -fx-background-color: -color-pink-100;
+    -fx-text-fill: -color-pink-700;
+}
+
+.badge-rose {
+    -fx-background-color: -color-rose-100;
+    -fx-text-fill: -color-rose-700;
+}
+
 .badge-sm { -fx-padding: 2px 8px; -fx-font-size: 11px; }
 .badge-lg { -fx-padding: 6px 16px; -fx-font-size: 14px; }
 

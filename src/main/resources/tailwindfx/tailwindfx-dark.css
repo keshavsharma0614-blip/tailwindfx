@@ -449,6 +449,100 @@
     -fx-border-color: #404040;
 }
 
+/* =============================================================================
+ * DARK MODE - Additional Components
+ * ============================================================================= */
+
+.dark .badge {
+    -fx-background-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .badge-primary {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: #ffffff;
+}
+
+.dark .badge-secondary {
+    -fx-background-color: #525252;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .badge-success {
+    -fx-background-color: #22c55e;
+    -fx-text-fill: #ffffff;
+}
+
+.dark .badge-warning {
+    -fx-background-color: #f59e0b;
+    -fx-text-fill: #ffffff;
+}
+
+.dark .badge-error {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: #ffffff;
+}
+
+/* Dark mode for all color families in badges */
+.dark .badge-slate { -fx-background-color: #64748b; -fx-text-fill: #ffffff; }
+.dark .badge-orange { -fx-background-color: #ea580c; -fx-text-fill: #ffffff; }
+.dark .badge-amber { -fx-background-color: #d97706; -fx-text-fill: #ffffff; }
+.dark .badge-lime { -fx-background-color: #65a30d; -fx-text-fill: #ffffff; }
+.dark .badge-emerald { -fx-background-color: #059669; -fx-text-fill: #ffffff; }
+.dark .badge-teal { -fx-background-color: #0d9488; -fx-text-fill: #ffffff; }
+.dark .badge-cyan { -fx-background-color: #0891b2; -fx-text-fill: #ffffff; }
+.dark .badge-sky { -fx-background-color: #0284c7; -fx-text-fill: #ffffff; }
+.dark .badge-indigo { -fx-background-color: #6366f1; -fx-text-fill: #ffffff; }
+.dark .badge-violet { -fx-background-color: #8b5cf6; -fx-text-fill: #ffffff; }
+.dark .badge-purple { -fx-background-color: #a855f7; -fx-text-fill: #ffffff; }
+.dark .badge-fuchsia { -fx-background-color: #c026d3; -fx-text-fill: #ffffff; }
+.dark .badge-pink { -fx-background-color: #db2777; -fx-text-fill: #ffffff; }
+.dark .badge-rose { -fx-background-color: #e11d48; -fx-text-fill: #ffffff; }
+
+/* Dark mode for alerts */
+.dark .alert {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .alert-success {
+    -fx-background-color: rgba(34, 197, 94, 0.1);
+    -fx-border-color: #22c55e;
+    -fx-text-fill: #86efac;
+}
+
+.dark .alert-warning {
+    -fx-background-color: rgba(245, 158, 11, 0.1);
+    -fx-border-color: #f59e0b;
+    -fx-text-fill: #fcd34d;
+}
+
+.dark .alert-error {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #fca5a5;
+}
+
+/* Dark mode for modals */
+.dark .modal {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+/* Dark mode for focus rings */
+.dark .focus\:ring:focused {
+    -fx-effect: dropshadow(gaussian, #3b82f6, 4, 0.5, 0, 0);
+}
+
+.dark .focus\:ring-blue:focused {
+    -fx-effect: dropshadow(gaussian, #3b82f6, 4, 0.5, 0, 0);
+}
+
+.dark .focus\:ring-red:focused {
+    -fx-effect: dropshadow(gaussian, #ef4444, 4, 0.5, 0, 0);
+}
+
 .dark .card-title {
     -fx-text-fill: #f5f5f5;
 }

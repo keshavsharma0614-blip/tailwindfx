@@ -65,6 +65,16 @@
 .p-16 { -fx-padding: 32px; }
 .p-20 { -fx-padding: 40px; }
 .p-24 { -fx-padding: 48px; }
+.p-28 { -fx-padding: 56px; }
+.p-32 { -fx-padding: 64px; }
+.p-36 { -fx-padding: 72px; }
+.p-40 { -fx-padding: 80px; }
+.p-44 { -fx-padding: 88px; }
+.p-48 { -fx-padding: 96px; }
+.p-52 { -fx-padding: 104px; }
+.p-56 { -fx-padding: 112px; }
+.p-60 { -fx-padding: 120px; }
+.p-64 { -fx-padding: 128px; }
 
 /* Padding X (left/right) */
 .px-0 { -fx-padding: 0px 0px; }
@@ -77,6 +87,12 @@
 .px-8 { -fx-padding: 0px 16px; }
 .px-10 { -fx-padding: 0px 20px; }
 .px-12 { -fx-padding: 0px 24px; }
+.px-14 { -fx-padding: 0px 28px; }
+.px-16 { -fx-padding: 0px 32px; }
+.px-20 { -fx-padding: 0px 40px; }
+.px-24 { -fx-padding: 0px 48px; }
+.px-28 { -fx-padding: 0px 56px; }
+.px-32 { -fx-padding: 0px 64px; }
 
 /* Padding Y (top/bottom) */
 .py-0 { -fx-padding: 0px 0px; }
@@ -89,6 +105,12 @@
 .py-8 { -fx-padding: 16px 0px; }
 .py-10 { -fx-padding: 20px 0px; }
 .py-12 { -fx-padding: 24px 0px; }
+.py-14 { -fx-padding: 28px 0px; }
+.py-16 { -fx-padding: 32px 0px; }
+.py-20 { -fx-padding: 40px 0px; }
+.py-24 { -fx-padding: 48px 0px; }
+.py-28 { -fx-padding: 56px 0px; }
+.py-32 { -fx-padding: 64px 0px; }
 
 /* Padding individual */
 .pt-0 { -fx-padding: 0px 0px 0px 0px; }
@@ -128,6 +150,12 @@
 .gap-8 { -fx-hgap: 16px; -fx-vgap: 16px; }
 .gap-10 { -fx-hgap: 20px; -fx-vgap: 20px; }
 .gap-12 { -fx-hgap: 24px; -fx-vgap: 24px; }
+.gap-14 { -fx-hgap: 28px; -fx-vgap: 28px; }
+.gap-16 { -fx-hgap: 32px; -fx-vgap: 32px; }
+.gap-20 { -fx-hgap: 40px; -fx-vgap: 40px; }
+.gap-24 { -fx-hgap: 48px; -fx-vgap: 48px; }
+.gap-28 { -fx-hgap: 56px; -fx-vgap: 56px; }
+.gap-32 { -fx-hgap: 64px; -fx-vgap: 64px; }
 
 /* Gap X */
 .gap-x-0 { -fx-hgap: 0px; }
@@ -137,6 +165,14 @@
 .gap-x-4 { -fx-hgap: 8px; }
 .gap-x-6 { -fx-hgap: 12px; }
 .gap-x-8 { -fx-hgap: 16px; }
+.gap-x-10 { -fx-hgap: 20px; }
+.gap-x-12 { -fx-hgap: 24px; }
+.gap-x-14 { -fx-hgap: 28px; }
+.gap-x-16 { -fx-hgap: 32px; }
+.gap-x-20 { -fx-hgap: 40px; }
+.gap-x-24 { -fx-hgap: 48px; }
+.gap-x-28 { -fx-hgap: 56px; }
+.gap-x-32 { -fx-hgap: 64px; }
 
 /* Gap Y */
 .gap-y-0 { -fx-vgap: 0px; }
@@ -146,6 +182,14 @@
 .gap-y-4 { -fx-vgap: 8px; }
 .gap-y-6 { -fx-vgap: 12px; }
 .gap-y-8 { -fx-vgap: 16px; }
+.gap-y-10 { -fx-vgap: 20px; }
+.gap-y-12 { -fx-vgap: 24px; }
+.gap-y-14 { -fx-vgap: 28px; }
+.gap-y-16 { -fx-vgap: 32px; }
+.gap-y-20 { -fx-vgap: 40px; }
+.gap-y-24 { -fx-vgap: 48px; }
+.gap-y-28 { -fx-vgap: 56px; }
+.gap-y-32 { -fx-vgap: 64px; }
 
 /* =============================================================================
  * SIZING - Width
@@ -170,6 +214,9 @@
 .w-48 { -fx-pref-width: 96px; }
 .w-56 { -fx-pref-width: 112px; }
 .w-64 { -fx-pref-width: 128px; }
+.w-72 { -fx-pref-width: 144px; }
+.w-80 { -fx-pref-width: 160px; }
+.w-96 { -fx-pref-width: 192px; }
 
 /* Min Width */
 .min-w-0 { -fx-min-width: 0px; }
@@ -209,6 +256,9 @@
 .h-48 { -fx-pref-height: 96px; }
 .h-56 { -fx-pref-height: 112px; }
 .h-64 { -fx-pref-height: 128px; }
+.h-72 { -fx-pref-height: 144px; }
+.h-80 { -fx-pref-height: 160px; }
+.h-96 { -fx-pref-height: 192px; }
 
 /* Min Height */
 .min-h-0 { -fx-min-height: 0px; }
@@ -230,6 +280,10 @@
 .size-20 { -fx-pref-width: 40px; -fx-pref-height: 40px; }
 .size-24 { -fx-pref-width: 48px; -fx-pref-height: 48px; }
 .size-32 { -fx-pref-width: 64px; -fx-pref-height: 64px; }
+.size-40 { -fx-pref-width: 80px; -fx-pref-height: 80px; }
+.size-48 { -fx-pref-width: 96px; -fx-pref-height: 96px; }
+.size-56 { -fx-pref-width: 112px; -fx-pref-height: 112px; }
+.size-64 { -fx-pref-width: 128px; -fx-pref-height: 128px; }
 
 /* =============================================================================
  * Z-INDEX (orden de apilamiento)
@@ -269,3 +323,48 @@
 .cursor-move { -fx-cursor: -cursor-move; }
 .cursor-wait { -fx-cursor: -cursor-wait; }
 .cursor-crosshair { -fx-cursor: -cursor-crosshair; }
+
+/* =============================================================================
+ * ACCESSIBILITY
+ * ============================================================================= */
+
+/* Screen reader only (hidden visually but available to screen readers) */
+.sr-only {
+    -fx-position: absolute;
+    -fx-width: 1px;
+    -fx-height: 1px;
+    -fx-padding: 0;
+    -fx-margin: -1px;
+    -fx-overflow: hidden;
+    -fx-clip: rect(0, 0, 0, 0);
+    -fx-white-space: nowrap;
+    -fx-border: 0;
+}
+
+/* Not screen reader only (opposite of sr-only) */
+.not-sr-only {
+    -fx-position: static;
+    -fx-width: auto;
+    -fx-height: auto;
+    -fx-padding: initial;
+    -fx-margin: initial;
+    -fx-overflow: visible;
+    -fx-clip: auto;
+    -fx-white-space: normal;
+}
+
+/* Focus management */
+.focus\:outline-none:focused { -fx-focus-traversable: true; -fx-background-insets: 0; }
+.focus\:ring:focused { -fx-effect: dropshadow(gaussian, -color-blue-500, 4, 0.5, 0, 0); }
+.focus\:ring-2:focused { -fx-effect: dropshadow(gaussian, -color-blue-500, 6, 0.5, 0, 0); }
+.focus\:ring-blue:focused { -fx-effect: dropshadow(gaussian, -color-blue-500, 4, 0.5, 0, 0); }
+.focus\:ring-red:focused { -fx-effect: dropshadow(gaussian, -color-red-500, 4, 0.5, 0, 0); }
+
+/* High contrast mode support */
+.high-contrast { -fx-contrast: 200%; }
+.low-contrast { -fx-contrast: 50%; }
+
+/* Reduced motion (simulated - actual implementation needs Java code) */
+@media (prefers-reduced-motion: reduce) {
+    .motion-reduce\:animate-none { /* Disable animations */ }
+}
