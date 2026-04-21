@@ -2,10 +2,8 @@ package tailwindfx;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
