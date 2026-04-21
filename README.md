@@ -56,7 +56,7 @@ AnimationUtil.onHoverScale(btn, 1.05);
 <dependency>
     <groupId>io.github.tailwindfx</groupId>
     <artifactId>tailwindfx</artifactId>
-    <version>4.3.0</version>
+    <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
 
