@@ -136,7 +136,7 @@ class TailwindFXMainTest extends ApplicationTest {
                 root.getChildren().add(label);
             });
             
-            verifyThat(Label.class, hasText("Test"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("Test"));
             verifyThat(".text-blue-500", hasStyleClass("text-blue-500"));
         }
 
@@ -155,7 +155,7 @@ class TailwindFXMainTest extends ApplicationTest {
             });
             
             // Verify label is visible with all styles
-            verifyThat(Label.class, hasText("Test"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("Test"));
         }
 
         @Test
@@ -170,7 +170,7 @@ class TailwindFXMainTest extends ApplicationTest {
                 root.getChildren().add(btn);
             });
             
-            verifyThat(Button.class, hasText("Click"));
+            verifyThat(lookup(Button.class).queryAs(Button.class), LabeledMatchers.hasText("Click"));
             verifyThat(".btn-primary", hasStyleClass("btn-primary"));
             
             // Test button click
@@ -188,7 +188,7 @@ class TailwindFXMainTest extends ApplicationTest {
                 root.getChildren().add(label);
             });
             
-            verifyThat(Label.class, hasText("Test"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("Test"));
         }
 
         @Test
@@ -215,7 +215,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should apply JIT styles to node")
         void testJitApply() {
             Label label = new Label("Test");
-            TailwindFX.jitApply(label, "p-4", "text-sm");
+            TailwindFX.apply(label, "p-4", "text-sm");
 
             // Should add inline styles
             assertNotNull(label.getStyle());
@@ -225,7 +225,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should apply mixed JIT and CSS class styles")
         void testJitApplyMixed() {
             Label label = new Label("Test");
-            TailwindFX.jitApply(label, "btn-primary", "bg-blue-500/80");
+            TailwindFX.apply(label, "btn-primary", "bg-blue-500/80");
 
             assertNotNull(label.getStyle());
         }
@@ -234,7 +234,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should handle JIT with arbitrary values")
         void testJitArbitraryValues() {
             Label label = new Label("Test");
-            TailwindFX.jitApply(label, "p-[13px]", "w-[200px]");
+            TailwindFX.apply(label, "p-[13px]", "w-[200px]");
 
             assertTrue(label.getStyle().contains("13px"));
             assertTrue(label.getStyle().contains("200px"));
@@ -276,7 +276,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should apply padding via utility class")
         void testConveniencePadding() {
             Label label = new Label("Test");
-            TailwindFX.jit(label, "p-4");
+            TailwindFX.apply(label, "p-4");
 
             // p-4 = 16px (4 * 4px scale)
             assertTrue(label.getStyle().contains("16px"));
@@ -298,7 +298,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should apply background color via JIT")
         void testConvenienceBackgroundColor() {
             Label label = new Label("Test");
-            TailwindFX.jit(label, "bg-blue-500");
+            TailwindFX.apply(label, "bg-blue-500");
 
             assertTrue(label.getStyle().contains("-fx-background-color"));
         }
@@ -307,7 +307,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should apply text color via JIT")
         void testConvenienceTextColor() {
             Label label = new Label("Test");
-            TailwindFX.jit(label, "text-red-600");
+            TailwindFX.apply(label, "text-red-600");
 
             assertTrue(label.getStyle().contains("-fx-text-fill"));
         }
@@ -326,7 +326,7 @@ class TailwindFXMainTest extends ApplicationTest {
         @DisplayName("Should apply rounded corners via JIT")
         void testConvenienceRounded() {
             Label label = new Label("Test");
-            TailwindFX.jit(label, "rounded-md");
+            TailwindFX.apply(label, "rounded-md");
 
             // rounded-md should apply border radius
             assertTrue(label.getStyle().contains("-fx-background-radius"));
