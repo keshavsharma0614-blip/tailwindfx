@@ -11,7 +11,7 @@
         <exec.mainClass>tailwindfx.TailwindFXExample</exec.mainClass>
         <javafx.version>21</javafx.version>
         <junit.version>5.10.2</junit.version>
-        <testfx.version>4.0.18</testfx.version>
+        <testfx.version>4.0.17</testfx.version>
         <mockito.version>5.11.0</mockito.version>
         <jacoco.version>0.8.14</jacoco.version>
         <surefire.version>3.2.5</surefire.version>
