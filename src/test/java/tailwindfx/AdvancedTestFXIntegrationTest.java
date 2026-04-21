@@ -1,11 +1,16 @@
 package tailwindfx;
 
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.junit.jupiter.api.*;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.matcher.base.NodeMatchers;
@@ -17,6 +22,10 @@ import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.*;
 import static org.testfx.matcher.control.LabeledMatchers.*;
 import static org.testfx.matcher.control.TextInputControlMatchers.*;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Advanced TestFX integration tests demonstrating full capabilities:
@@ -167,8 +176,8 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             field.setPromptText("Enter your name");
             
             interact(() -> root.getChildren().add(field));
-            
-            verifyThat(TextField.class, hasPromptText("Enter your name"));
+
+            verifyThat(lookup(TextField.class).queryAs(TextField.class), TextInputControlMatchers.hasPromptText("Enter your name"));
         }
     }
 
@@ -185,7 +194,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             interact(() -> root.getChildren().add(label));
             
             verifyThat(".target-class", isNotNull());
-            verifyThat(".target-class", hasText("Target"));
+            verifyThat(".target-class", LabeledMatchers.hasText("Target"));
         }
 
         @Test
@@ -197,7 +206,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             interact(() -> root.getChildren().add(label));
             
             verifyThat("#my-label-id", isNotNull());
-            verifyThat("#my-label-id", hasText("ID Target"));
+            verifyThat("#my-label-id", LabeledMatchers.hasText("ID Target"));
         }
 
         @Test
@@ -208,8 +217,8 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             
             interact(() -> root.getChildren().add(btn));
             
-            verifyThat(Button.class, (b) -> !b.isDisabled()).exists();
-            verifyThat(Button.class, hasText("Test Button")).exists();
+            verifyThat(lookup(Button.class).queryAs(Button.class), (b) -> !b.isDisabled());
+            verifyThat(lookup(Button.class).queryAs(Button.class), LabeledMatchers.hasText("Test Button"));
         }
 
         @Test
@@ -354,7 +363,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             
             interact(() -> root.getChildren().add(avatar));
             
-            verifyThat(StackPane.class, isNotNull());
+            verifyThat(lookup(StackPane.class).queryAs(StackPane.class), isNotNull());
             clickOn(avatar);
         }
 
