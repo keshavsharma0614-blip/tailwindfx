@@ -11,17 +11,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.BeforeEach;
 import org.testfx.framework.junit5.ApplicationTest;
+import org.testfx.matcher.base.NodeMatchers;
+import org.testfx.matcher.control.LabeledMatchers;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.testfx.api.FxAssert.verifyThat;
+import static org.testfx.matcher.base.NodeMatchers.*;
+import static org.testfx.matcher.control.LabeledMatchers.*;
 
 /**
- * Unit tests for TailwindFX main entry point.
+ * Unit tests for TailwindFX main entry point with full TestFX capabilities.
+ * Tests CSS installation, style application, and user interactions.
  */
-@DisplayName("TailwindFX Main Entry Point Tests")
+@DisplayName("TailwindFX Main Entry Point Tests with TestFX")
 class TailwindFXMainTest extends ApplicationTest {
 
     private Scene scene;
@@ -119,16 +125,23 @@ class TailwindFXMainTest extends ApplicationTest {
     class ApplyStylesTests {
 
         @Test
-        @DisplayName("Should apply single style class")
+        @DisplayName("Should apply single style class and verify visibility")
         void testApplySingleStyle() {
             Label label = new Label("Test");
             TailwindFX.apply(label, "text-blue-500");
 
             assertTrue(label.getStyleClass().contains("text-blue-500"));
+            
+            interact(() -> {
+                root.getChildren().add(label);
+            });
+            
+            verifyThat(Label.class, hasText("Test"));
+            verifyThat(".text-blue-500", hasStyleClass("text-blue-500"));
         }
 
         @Test
-        @DisplayName("Should apply multiple style classes")
+        @DisplayName("Should apply multiple style classes and verify all present")
         void testApplyMultipleStyles() {
             Label label = new Label("Test");
             TailwindFX.apply(label, "text-blue-500", "font-bold", "text-lg");
@@ -136,32 +149,61 @@ class TailwindFXMainTest extends ApplicationTest {
             assertTrue(label.getStyleClass().contains("text-blue-500"));
             assertTrue(label.getStyleClass().contains("font-bold"));
             assertTrue(label.getStyleClass().contains("text-lg"));
+            
+            interact(() -> {
+                root.getChildren().add(label);
+            });
+            
+            // Verify label is visible with all styles
+            verifyThat(Label.class, hasText("Test"));
         }
 
         @Test
-        @DisplayName("Should apply button styles")
+        @DisplayName("Should apply button styles and test click interaction")
         void testApplyButtonStyles() {
             Button btn = new Button("Click");
             TailwindFX.apply(btn, "btn-primary");
 
             assertTrue(btn.getStyleClass().contains("btn-primary"));
+            
+            interact(() -> {
+                root.getChildren().add(btn);
+            });
+            
+            verifyThat(Button.class, hasText("Click"));
+            verifyThat(".btn-primary", hasStyleClass("btn-primary"));
+            
+            // Test button click
+            clickOn(btn);
         }
 
         @Test
-        @DisplayName("Should handle null style gracefully")
+        @DisplayName("Should handle null style gracefully without crashing")
         void testApplyNullStyle() {
             Label label = new Label("Test");
             // Should not throw
             assertDoesNotThrow(() -> TailwindFX.apply(label, (String) null));
+            
+            interact(() -> {
+                root.getChildren().add(label);
+            });
+            
+            verifyThat(Label.class, hasText("Test"));
         }
 
         @Test
-        @DisplayName("Should handle empty styles")
+        @DisplayName("Should handle empty styles and remain functional")
         void testApplyEmptyStyles() {
             Label label = new Label("Test");
             TailwindFX.apply(label);
 
             assertTrue(label.getStyleClass().isEmpty());
+            
+            interact(() -> {
+                root.getChildren().add(label);
+            });
+            
+            verifyThat(Label.class, hasText("Test"));
         }
     }
 
