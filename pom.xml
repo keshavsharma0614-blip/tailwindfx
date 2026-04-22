@@ -82,7 +82,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Surefire Plugin for JUnit 5 -->
+            <!-- Maven Surefire Plugin for TestFX -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -90,8 +90,12 @@
                 <configuration>
                     <argLine>
                         ${jacoco.argLine}
+                        --add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+                        --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
                         --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+                        --add-opens javafx.graphics/com.sun.prism=ALL-UNNAMED
+                        --add-opens javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED
                     </argLine>
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
