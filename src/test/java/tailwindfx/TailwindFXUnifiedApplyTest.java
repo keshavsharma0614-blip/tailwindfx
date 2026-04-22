@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.function.Executable;
@@ -12,11 +13,12 @@ import org.junit.jupiter.api.function.Executable;
 /**
  * Tests for the unified TailwindFX.apply() method with automatic JIT detection.
  */
-class TailwindFXUnifiedApplyTest {
+class TailwindFXUnifiedApplyTest extends ApplicationTest {
 
     private Label label;
     private Button button;
 
+    @Override
     @BeforeEach
     void setUp() {
         label = new Label("Test");
