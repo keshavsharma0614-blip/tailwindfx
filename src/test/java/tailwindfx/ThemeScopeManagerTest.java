@@ -1,13 +1,12 @@
 package tailwindfx;
 
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -23,11 +22,6 @@ class ThemeScopeManagerTest {
 
     private Scene scene;
     private StackPane root;
-
-    @BeforeAll
-    static void initPlatform() {
-        Platform.startup(() -> {});
-    }
 
     @BeforeEach
     void setUp() {
