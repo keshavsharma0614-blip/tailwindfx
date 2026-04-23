@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.BeforeEach;
-import org.testfx.framework.junit5.ApplicationTest;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -19,13 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for ThemeScopeManager.
  */
 @DisplayName("ThemeScopeManager Tests")
-class ThemeScopeManagerTest extends ApplicationTest {
+class ThemeScopeManagerTest {
 
     private Scene scene;
     private StackPane root;
 
     @BeforeEach
     void setUp() {
+        Platform.startup(() -> {});
         root = new StackPane();
         scene = new Scene(root, 800, 600);
     }
