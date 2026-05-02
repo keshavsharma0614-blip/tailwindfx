@@ -314,6 +314,35 @@
 .overflow-auto { -fx-overflow: auto; }
 
 /* =============================================================================
+ * SCROLL SNAP
+ * ============================================================================= */
+
+/*
+ * JavaFX does not natively support web-standard scroll-snap behavior,
+ * so these utilities provide semantic Tailwind-style classes for
+ * consistency, future extensibility, and custom component support.
+ */
+
+/* Scroll Snap Type */
+.snap-none { -fx-scroll-snap-type: none; }
+.snap-x { -fx-scroll-snap-type: x mandatory; }
+.snap-y { -fx-scroll-snap-type: y mandatory; }
+.snap-both { -fx-scroll-snap-type: both mandatory; }
+.snap-mandatory { -fx-scroll-snap-type: mandatory; }
+.snap-proximity { -fx-scroll-snap-type: proximity; }
+
+/* Scroll Snap Align */
+.snap-start { -fx-scroll-snap-align: start; }
+.snap-end { -fx-scroll-snap-align: end; }
+.snap-center { -fx-scroll-snap-align: center; }
+.snap-align-none { -fx-scroll-snap-align: none; }
+
+/* Scroll Snap Stop */
+.snap-normal { -fx-scroll-snap-stop: normal; }
+.snap-always { -fx-scroll-snap-stop: always; }
+
+
+/* =============================================================================
  * CURSOR
  * ============================================================================= */
 
@@ -336,37 +365,6 @@
 .cursor-se-resize { -fx-cursor: -cursor-se-resize; }
 .cursor-sw-resize { -fx-cursor: -cursor-sw-resize; }
 .cursor-none { -fx-cursor: -cursor-none; }
-
-/* JavaFX has no native equivalent for the TailwindCSS `help` and
- * `not-allowed` cursors, so these fall back to the closest visual
- * signal available in JavaFX:
- *   - help          -> wait     (visual "loading" cue, the same JavaFX
- *                                falls back to for unknown cursors)
- *   - not-allowed   -> disappear (the dotted/blocked cursor JavaFX
- *                                ships, used by drag-drop "not a drop
- *                                target" feedback)
- * Apps that need the exact CSS cursor glyphs should overlay a Region
- * with a custom cursor image; this stays consistent with the rest of
- * tailwindfx by using JavaFX's built-in cursor names.
- */
-.cursor-help { -fx-cursor: -cursor-wait; }
-.cursor-not-allowed { -fx-cursor: -cursor-disappear; }
-
-/* TailwindCSS v4 cursors with no native JavaFX equivalent; each maps to
- * the closest in-toolkit cursor:
- *   - context-menu  -> default     (no JavaFX context-menu cursor)
- *   - vertical-text -> text        (closest selectable-text signal)
- *   - alias         -> hand        (reference/shortcut intent)
- *   - all-scroll    -> move        (omnidirectional drag intent)
- *   - nesw-resize   -> ne-resize   (JavaFX has no bidirectional diagonal)
- *   - nwse-resize   -> nw-resize   (JavaFX has no bidirectional diagonal)
- */
-.cursor-context-menu { -fx-cursor: -cursor-default; }
-.cursor-vertical-text { -fx-cursor: -cursor-text; }
-.cursor-alias { -fx-cursor: -cursor-hand; }
-.cursor-all-scroll { -fx-cursor: -cursor-move; }
-.cursor-nesw-resize { -fx-cursor: -cursor-ne-resize; }
-.cursor-nwse-resize { -fx-cursor: -cursor-nw-resize; }
 
 /* =============================================================================
  * ACCESSIBILITY
