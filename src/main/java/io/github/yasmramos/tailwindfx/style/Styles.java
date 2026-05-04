@@ -447,6 +447,82 @@ public final class Styles {
     }
 
     // =========================================================================
+    // SCROLL SNAP — snap-x, snap-y, snap-both, snap-start, snap-center
+    // =========================================================================
+
+    public static <T extends Node> T snapNone(T node) {
+        Preconditions.requireNode(node, "Styles.snapNone");
+        node.getStyleClass().add("snap-none");
+        return node;
+    }
+
+    public static <T extends Node> T snapX(T node) {
+        Preconditions.requireNode(node, "Styles.snapX");
+        node.getStyleClass().add("snap-x");
+        return node;
+    }
+
+    public static <T extends Node> T snapY(T node) {
+        Preconditions.requireNode(node, "Styles.snapY");
+        node.getStyleClass().add("snap-y");
+        return node;
+    }
+
+    public static <T extends Node> T snapBoth(T node) {
+        Preconditions.requireNode(node, "Styles.snapBoth");
+        node.getStyleClass().add("snap-both");
+        return node;
+    }
+
+    public static <T extends Node> T snapMandatory(T node) {
+        Preconditions.requireNode(node, "Styles.snapMandatory");
+        node.getStyleClass().add("snap-mandatory");
+        return node;
+    }
+
+    public static <T extends Node> T snapProximity(T node) {
+        Preconditions.requireNode(node, "Styles.snapProximity");
+        node.getStyleClass().add("snap-proximity");
+        return node;
+    }
+
+    public static <T extends Node> T snapStart(T node) {
+        Preconditions.requireNode(node, "Styles.snapStart");
+        node.getStyleClass().add("snap-start");
+        return node;
+    }
+
+    public static <T extends Node> T snapEnd(T node) {
+    Preconditions.requireNode(node, "Styles.snapEnd");
+    node.getStyleClass().add("snap-end");
+    return node;
+    }
+
+    public static <T extends Node> T snapCenter(T node) {
+        Preconditions.requireNode(node, "Styles.snapCenter");
+        node.getStyleClass().add("snap-center");
+        return node;
+    }
+
+    public static <T extends Node> T snapAlignNone(T node) {
+        Preconditions.requireNode(node, "Styles.snapAlignNone");
+        node.getStyleClass().add("snap-align-none");
+        return node;
+    }
+
+    public static <T extends Node> T snapNormal(T node) {
+        Preconditions.requireNode(node, "Styles.snapNormal");
+        node.getStyleClass().add("snap-normal");
+        return node;
+    }
+
+    public static <T extends Node> T snapAlways(T node) {
+        Preconditions.requireNode(node, "Styles.snapAlways");
+        node.getStyleClass().add("snap-always");
+        return node;
+    }
+    
+    // =========================================================================
     // SELF ALIGNMENT — self-start, self-center, self-end, self-stretch
     // Corresponde a: align-self en CSS web (GridPane)
     // =========================================================================
@@ -577,8 +653,9 @@ public final class Styles {
     }
 
     /** Elimina todos los filtros ColorAdjust del nodo */
-    public static <T extends Node> T filterNone(T node) {
-        if (node.getEffect() instanceof ColorAdjust) node.setEffect(null);
+    public static <T extends Node> T snapEnd(T node) {
+        Preconditions.requireNode(node, "Styles.snapEnd");
+        node.getStyleClass().add("snap-end");
         return node;
     }
 
