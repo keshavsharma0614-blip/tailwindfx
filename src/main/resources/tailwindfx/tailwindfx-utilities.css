@@ -314,6 +314,28 @@
 .overflow-auto { -fx-overflow: auto; }
 
 /* =============================================================================
+ * SCROLL SNAP
+ * ============================================================================= */
+
+/* Scroll Snap Type */
+.snap-none { -fx-scroll-snap-type: none; }
+.snap-x { -fx-scroll-snap-type: x mandatory; }
+.snap-y { -fx-scroll-snap-type: y mandatory; }
+.snap-both { -fx-scroll-snap-type: both mandatory; }
+.snap-mandatory { -fx-scroll-snap-type: mandatory; }
+.snap-proximity { -fx-scroll-snap-type: proximity; }
+
+/* Scroll Snap Align */
+.snap-start { -fx-scroll-snap-align: start; }
+.snap-end { -fx-scroll-snap-align: end; }
+.snap-center { -fx-scroll-snap-align: center; }
+.snap-align-none { -fx-scroll-snap-align: none; }
+
+/* Scroll Snap Stop */
+.snap-normal { -fx-scroll-snap-stop: normal; }
+.snap-always { -fx-scroll-snap-stop: always; }
+
+/* =============================================================================
  * CURSOR
  * ============================================================================= */
 
